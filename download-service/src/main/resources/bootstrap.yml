@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: download-service
+  cloud:
+    nacos:
+      server-addr: localhost:8848
