@@ -23,7 +23,8 @@ public class PasswordOnlyUserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if (user.findUserByName(username) == null) throw new UsernameNotFoundException(username);
+        if (username == null || user.findUserByName(username) == null)
+            throw new UsernameNotFoundException(username);
         String password = user.getUserPassword(username);
         if (password == null) // 传入默认密码
             password = DriveIndexCommon.DEFAULT_PASSWORD;

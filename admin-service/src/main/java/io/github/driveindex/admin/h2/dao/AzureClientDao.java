@@ -1,4 +1,4 @@
-package io.github.driveindex.azure.h2.dao;
+package io.github.driveindex.admin.h2.dao;
 
 import io.github.driveindex.common.dto.azure.drive.AzureClientDetailDto;
 import lombok.Data;

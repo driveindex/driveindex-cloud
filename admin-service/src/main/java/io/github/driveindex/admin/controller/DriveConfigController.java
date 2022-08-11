@@ -1,6 +1,6 @@
-package io.github.driveindex.azure.controller;
+package io.github.driveindex.admin.controller;
 
-import io.github.driveindex.azure.module.DriveConfigModule;
+import io.github.driveindex.admin.module.DriveConfigModule;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.dto.result.ResponseData;
@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date 2022/8/9 12:04
  */
 @RequiredArgsConstructor
-@RestController("/api/admin/drive_config")
+@RestController("/api/azure/drive_config")
 public class DriveConfigController {
-    private final DriveConfigModule config;
+    private final DriveConfigModule configModule;
 
 
     @PostMapping("/{aClient}/{aAccount}/{aDrive}")
@@ -28,7 +28,7 @@ public class DriveConfigController {
             @PathVariable String aDrive,
             @RequestBody DriveConfigDetailDto dto
     ) {
-        boolean save = config.save(aClient, aAccount, aDrive, dto);
+        boolean save = configModule.save(aClient, aAccount, aDrive, dto);
         return save ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 
@@ -40,13 +40,27 @@ public class DriveConfigController {
             @PathVariable String aDrive,
             Boolean enabled
     ) {
-        boolean setEnable = config.enable(aClient, aAccount, aDrive, enabled);
+        boolean setEnable = configModule.enable(aClient, aAccount, aDrive, enabled);
         return setEnable ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 
-    @PostMapping("/delete/{aClient}/{aAccount}")
-    public ResponseData delete(@PathVariable String aClient, @PathVariable String aAccount) {
-        config.delete(aClient, aAccount);
+    @PostMapping("/delete/{aClient}/{aAccount}/{aConfig}")
+    public ResponseData delete(
+            @PathVariable String aClient,
+            @PathVariable String aAccount,
+            @PathVariable String aConfig
+    ) {
+        configModule.delete(aClient, aAccount, aConfig);
         return SuccessResult.SAMPLE;
+    }
+
+    @PostMapping("/default/{aClient}/{aAccount}/{aConfig}")
+    public ResponseData setDefault(
+            @PathVariable String aClient,
+            @PathVariable String aAccount,
+            @PathVariable String aConfig
+    ) {
+        boolean setDefault = configModule.setDefault(aClient, aAccount, aConfig);
+        return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 }

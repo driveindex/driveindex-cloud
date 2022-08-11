@@ -1,10 +1,10 @@
-package io.github.driveindex.azure.controller;
+package io.github.driveindex.admin.controller;
 
 import feign.Feign;
-import io.github.driveindex.azure.feign.AzureTokenClient;
-import io.github.driveindex.azure.feign.DeviceCodeCheckClient;
-import io.github.driveindex.azure.h2.dao.AccountTokenDao;
-import io.github.driveindex.azure.module.AzureAccountModule;
+import io.github.driveindex.admin.feign.AzureTokenClient;
+import io.github.driveindex.admin.feign.DeviceCodeCheckClient;
+import io.github.driveindex.admin.h2.dao.AccountTokenDao;
+import io.github.driveindex.admin.module.AzureAccountModule;
 import io.github.driveindex.common.dto.azure.common.AccountTokenDto;
 import io.github.driveindex.common.dto.azure.common.DeviceCodeDto;
 import io.github.driveindex.common.dto.azure.drive.AccountDetailDto;
@@ -26,7 +26,7 @@ import java.util.Map;
  * @Date 2022/8/8 13:34
  */
 @RequiredArgsConstructor
-@RestController("/api/admin/azure_account")
+@RestController("/api/azure/azure_account")
 public class AzureAccountController {
     private final AzureAccountModule accountModule;
     private final AzureTokenClient feign;
@@ -105,5 +105,11 @@ public class AzureAccountController {
     public ResponseData delete(@PathVariable String aClient, @PathVariable String aAccount) {
         accountModule.delete(aClient, aAccount);
         return SuccessResult.SAMPLE;
+    }
+
+    @PostMapping("/default/{aClient}/{aAccount}")
+    public ResponseData setDefault(@PathVariable String aClient, @PathVariable String aAccount) {
+        boolean setDefault = accountModule.setDefault(aClient, aAccount);
+        return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 }

@@ -1,7 +1,7 @@
-package io.github.driveindex.azure.h2.repository;
+package io.github.driveindex.admin.h2.repository;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import io.github.driveindex.azure.h2.dao.DriveConfigDao;
+import io.github.driveindex.admin.h2.dao.DriveConfigDao;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.springframework.lang.Nullable;

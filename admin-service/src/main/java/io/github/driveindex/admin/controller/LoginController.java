@@ -12,19 +12,19 @@ import org.springframework.web.bind.annotation.RestController;
  * @author sgpublic
  * @Date 2022/8/3 19:39
  */
-@RestController()
+@RestController("/api")
 public class LoginController {
     /**
      * 利用 SpringSecurity 检查登录是否有效
      * @return 若登录有效直接返回 code:200
      */
     @PreAuthorize("hasRole(\"ADMIN\")")
-    @PostMapping("/api/admin/token")
+    @PostMapping("/admin/token")
     public ResponseData checkToken() {
         return SuccessResult.SAMPLE;
     }
 
-    @PostMapping("/api/login")
+    @PostMapping("/login")
     public SuccessResult<AccessTokenDto> login(String password) {
         throw new BadCredentialsException("use authentication provider instead.");
     }

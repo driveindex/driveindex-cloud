@@ -1,4 +1,4 @@
-package io.github.driveindex.azure.feign;
+package io.github.driveindex.admin.feign;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -1,8 +1,8 @@
-package io.github.driveindex.azure.module;
+package io.github.driveindex.admin.module;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.github.driveindex.azure.h2.dao.AzureClientDao;
-import io.github.driveindex.azure.h2.repository.AzureClientRepository;
+import io.github.driveindex.admin.h2.dao.AzureClientDao;
+import io.github.driveindex.admin.h2.repository.AzureClientRepository;
 import io.github.driveindex.common.dto.azure.drive.AccountDto;
 import io.github.driveindex.common.dto.azure.drive.AzureClientDetailDto;
 import io.github.driveindex.common.dto.azure.drive.AzureClientDto;
@@ -73,5 +73,13 @@ public class AzureClientModule {
     public void delete(String id) {
         client.delete(new QueryWrapper<AzureClientDao>().eq("id", id));
         accountModule.delete(id);
+    }
+
+    public boolean setDefault(String aClient) {
+        AzureClientDao clientDao = getById(aClient);
+        if (clientDao == null) return false;
+        clientDao.setDefaultTargetFlag(System.currentTimeMillis());
+        client.updateById(clientDao);
+        return true;
     }
 }

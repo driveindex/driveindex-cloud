@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 /**
  * 用于验证需管理员权限的接口
  *
@@ -24,14 +26,18 @@ import reactor.core.publisher.Mono;
 public class AdminTokenFilter implements GlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        ServerHttpRequest request = exchange.getRequest();
-        // 清除认证信息以防止安全攻击
-        request.getHeaders().remove(JwtChecker.SECURITY_HEADER);
+        List<String> strings = exchange.getResponse().getHeaders()
+                .get(JwtChecker.SECURITY_HEADER);
+        if (strings != null) strings.clear();
 
+        ServerHttpRequest request = exchange.getRequest();
         String path = request.getPath().value();
 
         // 如果访问的接口为登录接口或不为管理员接口则放行
-        if (path.startsWith("/api/login") || !path.startsWith("/api/admin")) {
+        if (
+                path.startsWith("/api/login")
+                        || !path.startsWith("/api/admin")
+        ) {
             return chain.filter(exchange);
         }
 
@@ -40,7 +46,7 @@ public class AdminTokenFilter implements GlobalFilter {
         if (auth != null && JwtChecker.validateToken(auth)) {
             // 添加认证信息
             exchange.getResponse().getHeaders()
-                    .add(JwtChecker.SECURITY_HEADER, JwtChecker.getUsername(auth));
+                    .set(JwtChecker.SECURITY_HEADER, JwtChecker.getUsername(auth));
             return chain.filter(exchange);
         }
 

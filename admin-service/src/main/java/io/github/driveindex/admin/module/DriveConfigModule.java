@@ -1,8 +1,8 @@
-package io.github.driveindex.azure.module;
+package io.github.driveindex.admin.module;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.github.driveindex.azure.h2.dao.DriveConfigDao;
-import io.github.driveindex.azure.h2.repository.DriveConfigRepository;
+import io.github.driveindex.admin.h2.dao.DriveConfigDao;
+import io.github.driveindex.admin.h2.repository.DriveConfigRepository;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDto;
 import lombok.RequiredArgsConstructor;
@@ -73,5 +73,13 @@ public class DriveConfigModule {
 
     public void delete(String aClient) {
         config.delete(new QueryWrapper<DriveConfigDao>().eq("parent_client", aClient));
+    }
+
+    public boolean setDefault(String aClient, String aAccount, String aConfig) {
+        DriveConfigDao configDao = getDriveConfig(aClient, aAccount, aConfig);
+        if (configDao == null) return false;
+        configDao.setDefaultTargetFlag(System.currentTimeMillis());
+        config.updateById(configDao);
+        return true;
     }
 }

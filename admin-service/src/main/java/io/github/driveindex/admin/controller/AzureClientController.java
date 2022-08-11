@@ -1,7 +1,7 @@
-package io.github.driveindex.azure.controller;
+package io.github.driveindex.admin.controller;
 
-import io.github.driveindex.azure.h2.dao.AzureClientDao;
-import io.github.driveindex.azure.module.AzureClientModule;
+import io.github.driveindex.admin.h2.dao.AzureClientDao;
+import io.github.driveindex.admin.module.AzureClientModule;
 import io.github.driveindex.common.dto.azure.drive.AzureClientDetailDto;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.dto.result.ResponseData;
@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
  * @Date 2022/8/7 16:55
  */
 @RequiredArgsConstructor
-@RestController("/api/admin/azure_client")
+@RestController("/api/azure/azure_client")
 public class AzureClientController {
     private final AzureClientModule clientModule;
 
@@ -46,9 +46,15 @@ public class AzureClientController {
         return setEnabled ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 
-    @PostMapping("/delete/{id}")
-    public ResponseData delete(@PathVariable String id) {
-        clientModule.delete(id);
+    @PostMapping("/delete/{aClient}")
+    public ResponseData delete(@PathVariable String aClient) {
+        clientModule.delete(aClient);
         return SuccessResult.SAMPLE;
+    }
+
+    @PostMapping("/default/{aClient}")
+    public ResponseData setDefault(@PathVariable String aClient) {
+        boolean setDefault = clientModule.setDefault(aClient);
+        return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 }

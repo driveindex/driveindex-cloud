@@ -63,21 +63,21 @@
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.playtika.reactivefeign</groupId>
-			<artifactId>feign-reactor-spring-configuration</artifactId>
-			<version>${feign.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.playtika.reactivefeign</groupId>
-			<artifactId>feign-reactor-core</artifactId>
-			<version>${feign.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.playtika.reactivefeign</groupId>
-			<artifactId>feign-reactor-webclient</artifactId>
-			<version>${feign.version}</version>
-		</dependency>
+<!--		<dependency>-->
+<!--			<groupId>com.playtika.reactivefeign</groupId>-->
+<!--			<artifactId>feign-reactor-spring-configuration</artifactId>-->
+<!--			<version>${feign.version}</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.playtika.reactivefeign</groupId>-->
+<!--			<artifactId>feign-reactor-core</artifactId>-->
+<!--			<version>${feign.version}</version>-->
+<!--		</dependency>-->
+<!--		<dependency>-->
+<!--			<groupId>com.playtika.reactivefeign</groupId>-->
+<!--			<artifactId>feign-reactor-webclient</artifactId>-->
+<!--			<version>${feign.version}</version>-->
+<!--		</dependency>-->
 		<!--lombok-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>

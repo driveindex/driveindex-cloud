@@ -1,4 +1,4 @@
-package io.github.driveindex.azure.feign;
+package io.github.driveindex.admin.feign;
 
 import kotlin.text.Charsets;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -12,7 +12,7 @@ import java.util.Map;
  * @author sgpublic
  * @Date 2022/8/8 15:46
  */
-@FeignClient(url = AzureTokenClient.BASE_URL)
+@FeignClient(name = "login-microsoftonlin", url = AzureTokenClient.BASE_URL)
 public interface AzureTokenClient {
     String BASE_URL = "https://login.microsoftonline.com";
     String GRANT_TYPE_REFRESH = "refresh_token";

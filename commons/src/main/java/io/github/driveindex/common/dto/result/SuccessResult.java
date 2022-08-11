@@ -1,8 +1,8 @@
 package io.github.driveindex.common.dto.result;
 
+import io.github.driveindex.common.util.GsonUtil;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.ToString;
 
 import java.io.Serializable;
 
@@ -11,7 +11,6 @@ import java.io.Serializable;
  * @Date 2022/8/3 13:00
  */
 @Data
-@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class SuccessResult<T extends Serializable> extends SampleSuccessResult {
     public static final SampleSuccessResult SAMPLE = new SampleSuccessResult();
@@ -24,6 +23,11 @@ public class SuccessResult<T extends Serializable> extends SampleSuccessResult {
 
     public static <T extends Serializable> SuccessResult<T> of(T data) {
         return new SuccessResult<>(data);
+    }
+
+    @Override
+    public String toString() {
+        return GsonUtil.toJson(this);
     }
 }
 

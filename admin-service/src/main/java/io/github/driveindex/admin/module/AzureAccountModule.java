@@ -1,10 +1,10 @@
-package io.github.driveindex.azure.module;
+package io.github.driveindex.admin.module;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.github.driveindex.azure.h2.dao.AccountTokenDao;
-import io.github.driveindex.azure.h2.dao.AzureClientDao;
-import io.github.driveindex.azure.h2.repository.AccountTokenRepository;
-import io.github.driveindex.azure.h2.repository.AzureClientRepository;
+import io.github.driveindex.admin.h2.dao.AccountTokenDao;
+import io.github.driveindex.admin.h2.dao.AzureClientDao;
+import io.github.driveindex.admin.h2.repository.AccountTokenRepository;
+import io.github.driveindex.admin.h2.repository.AzureClientRepository;
 import io.github.driveindex.common.dto.azure.common.AccountTokenDto;
 import io.github.driveindex.common.dto.azure.drive.AccountDetailDto;
 import io.github.driveindex.common.util.Value;
@@ -92,5 +92,13 @@ public class AzureAccountModule {
                 "parent_client", aClient
         )));
         drive.delete(aClient);
+    }
+
+    public boolean setDefault(String aClient, String aAccount) {
+        AccountTokenDao account = getAccount(aClient, aAccount);
+        if (account == null) return false;
+        account.setDefaultTargetFlag(System.currentTimeMillis());
+        token.updateById(account);
+        return true;
     }
 }

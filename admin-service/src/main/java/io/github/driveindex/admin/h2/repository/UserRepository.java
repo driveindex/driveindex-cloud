@@ -19,7 +19,7 @@ public interface UserRepository extends BaseMapper<User> {
      * @return 用户，若无此用户返回 null
      */
     @Nullable
-    @Select("select * from `user` where `username`=#{username}\"")
+    @Select("select * from `user` where `username`=#{username}")
     User findUserByName(String username);
 
     /**

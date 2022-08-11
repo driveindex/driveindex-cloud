@@ -12,7 +12,7 @@ spring:
           uri: lb://download-service
           predicates:
             - Path=/download
-            - Query=path
+            - Query=target
         - id: admin-service
           uri: lb://admin-service
           predicates:

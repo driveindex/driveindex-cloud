@@ -1,6 +1,6 @@
-package io.github.driveindex.azure.h2.dao;
+package io.github.driveindex.admin.h2.dao;
 
-import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
+import io.github.driveindex.common.dto.azure.common.AccountTokenDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,8 +10,9 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class DriveConfigDao extends DriveConfigDetailDto {
+public class AccountTokenDao extends AccountTokenDto {
     private String id;
+    private String parentClientId;
     private Boolean enable;
 
     private Long defaultTargetFlag;
