@@ -9,8 +9,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Map;
 
 /**
  * @author sgpublic
@@ -32,8 +34,12 @@ public class GsonUtil {
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
 
-    public static <T> String toJson(T object) {
+    public static <T extends Serializable> String toJson(T object) {
         return GSON.toJson(object);
+    }
+
+    public static String fromMap(Map<?, ?> map) {
+        return GSON.toJson(map);
     }
 
     public static <T> T fromJson(String json, Class<T> clazz) {

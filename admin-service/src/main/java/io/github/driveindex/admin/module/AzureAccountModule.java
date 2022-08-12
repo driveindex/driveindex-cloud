@@ -69,12 +69,12 @@ public class AzureAccountModule {
         return true;
     }
 
-    public boolean enable(String aClient, String aAccount, boolean enabled) {
+    public boolean enable(String aClient, String aAccount, Boolean enabled) {
         AccountTokenDao account = getAccount(aClient, aAccount);
         if (account == null) return false;
 
         AccountTokenDao exist = token.getByAccount(aClient, aAccount);
-        exist.setEnable(enabled);
+        Value.check(enabled, (exist::setEnable));
         token.updateById(exist);
         return true;
     }
@@ -97,7 +97,7 @@ public class AzureAccountModule {
     public boolean setDefault(String aClient, String aAccount) {
         AccountTokenDao account = getAccount(aClient, aAccount);
         if (account == null) return false;
-        account.setDefaultTargetFlag(System.currentTimeMillis());
+        Value.check(System.currentTimeMillis(), (account::setDefaultTargetFlag));
         token.updateById(account);
         return true;
     }

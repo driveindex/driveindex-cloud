@@ -7,7 +7,6 @@
 		<module>gateway</module>
 		<module>azure-service</module>
         <module>commons</module>
-        <module>download-service</module>
 		<module>admin-service</module>
 		<module>logging-service</module>
 	</modules>
@@ -24,6 +23,7 @@
 		<feign.version>3.2.3</feign.version>
 		<build.skip>false</build.skip>
 		<docker-plugin.to.prefix>${project-name}</docker-plugin.to.prefix>
+		<jjwt.version>0.11.5</jjwt.version>
 	</properties>
 	<parent>
 		<groupId>org.springframework.boot</groupId>

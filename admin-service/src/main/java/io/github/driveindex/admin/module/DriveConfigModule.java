@@ -5,6 +5,7 @@ import io.github.driveindex.admin.h2.dao.DriveConfigDao;
 import io.github.driveindex.admin.h2.repository.DriveConfigRepository;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDto;
+import io.github.driveindex.common.util.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -42,16 +43,16 @@ public class DriveConfigModule {
         DriveConfigDao dao = getDriveConfig(aClient, aAccount, aConfig);
         if (dao == null) return false;
 
-        dao.setCalledName(dto.getCalledName());
-        dao.setDirHome(dto.getDirHome());
+        Value.check(dto.getCalledName(), (dao::setCalledName));
+        Value.check(dto.getDirHome(), (dao::setDirHome));
 
         return true;
     }
 
-    public boolean enable(String aClient, String aAccount, String aConfig, boolean enabled) {
+    public boolean enable(String aClient, String aAccount, String aConfig, Boolean enabled) {
         DriveConfigDao dao = getDriveConfig(aClient, aAccount, aConfig);
         if (dao == null) return false;
-        dao.setEnable(enabled);
+        Value.check(enabled, (dao::setEnable));
         config.updateById(dao);
         return true;
     }

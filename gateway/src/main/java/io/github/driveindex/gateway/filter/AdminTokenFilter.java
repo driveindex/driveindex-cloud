@@ -1,8 +1,10 @@
 package io.github.driveindex.gateway.filter;
 
+import io.github.driveindex.common.DriveIndexCommon;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.gateway.util.JwtChecker;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.http.HttpHeaders;
@@ -21,33 +23,40 @@ import java.util.List;
  * @author sgpublic
  * @Date 2022/8/4 9:32
  */
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class AdminTokenFilter implements GlobalFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        List<String> strings = exchange.getResponse().getHeaders()
-                .get(JwtChecker.SECURITY_HEADER);
-        if (strings != null) strings.clear();
-
         ServerHttpRequest request = exchange.getRequest();
+        ServerHttpRequest.Builder builder = request.mutate();
+        // 删除外部可能直接提交的认证信息预防攻击
+        builder.headers(k -> k.remove(DriveIndexCommon.SECURITY_HEADER));
+
         String path = request.getPath().value();
 
         // 如果访问的接口为登录接口或不为管理员接口则放行
-        if (
-                path.startsWith("/api/login")
-                        || !path.startsWith("/api/admin")
-        ) {
+        if (path.startsWith("/api/login") || !path.startsWith("/api/admin")) {
             return chain.filter(exchange);
         }
 
-        String auth = JwtChecker.resolveToken(request);
+        String auth = null;
+        List<String> list = request.getHeaders().get(DriveIndexCommon.TOKEN_KEY);
+        if (list != null && !list.isEmpty()) {
+            auth = list.get(0);
+        }
+        // 删除 token 信息
+        builder.headers(k -> k.remove(DriveIndexCommon.TOKEN_KEY));
+
         // 若提交了 token 且 token 有效则放行
-        if (auth != null && JwtChecker.validateToken(auth)) {
-            // 添加认证信息
-            exchange.getResponse().getHeaders()
-                    .set(JwtChecker.SECURITY_HEADER, JwtChecker.getUsername(auth));
-            return chain.filter(exchange);
+        if (auth != null) {
+            String tag = JwtChecker.findTag(auth);
+            if (tag != null) {
+                // 添加认证信息
+                builder.header(DriveIndexCommon.SECURITY_HEADER, tag);
+                return chain.filter(exchange.mutate().request(builder.build()).build());
+            }
         }
 
         ServerHttpResponse response = exchange.getResponse();

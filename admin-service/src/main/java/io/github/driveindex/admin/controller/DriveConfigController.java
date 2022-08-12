@@ -16,12 +16,12 @@ import org.springframework.web.bind.annotation.RestController;
  * @Date 2022/8/9 12:04
  */
 @RequiredArgsConstructor
-@RestController("/api/azure/drive_config")
+@RestController
 public class DriveConfigController {
     private final DriveConfigModule configModule;
 
 
-    @PostMapping("/{aClient}/{aAccount}/{aDrive}")
+    @PostMapping("/api/admin/drive_config/{aClient}/{aAccount}/{aDrive}")
     public ResponseData saveDrive(
             @PathVariable String aClient,
             @PathVariable String aAccount,
@@ -33,7 +33,7 @@ public class DriveConfigController {
     }
 
 
-    @PostMapping("/enabled/{aClient}/{aAccount}/{aDrive}")
+    @PostMapping("/api/admin/drive_config/enabled/{aClient}/{aAccount}/{aDrive}")
     public ResponseData enable(
             @PathVariable String aClient,
             @PathVariable String aAccount,
@@ -44,7 +44,7 @@ public class DriveConfigController {
         return setEnable ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 
-    @PostMapping("/delete/{aClient}/{aAccount}/{aConfig}")
+    @PostMapping("/api/admin/drive_config/delete/{aClient}/{aAccount}/{aConfig}")
     public ResponseData delete(
             @PathVariable String aClient,
             @PathVariable String aAccount,
@@ -54,7 +54,7 @@ public class DriveConfigController {
         return SuccessResult.SAMPLE;
     }
 
-    @PostMapping("/default/{aClient}/{aAccount}/{aConfig}")
+    @PostMapping("/api/admin/drive_config/default/{aClient}/{aAccount}/{aConfig}")
     public ResponseData setDefault(
             @PathVariable String aClient,
             @PathVariable String aAccount,

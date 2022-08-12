@@ -14,16 +14,16 @@ import org.springframework.web.bind.annotation.*;
  * @Date 2022/8/7 16:55
  */
 @RequiredArgsConstructor
-@RestController("/api/azure/azure_client")
+@RestController
 public class AzureClientController {
     private final AzureClientModule clientModule;
 
-    @GetMapping("/")
+    @GetMapping("/api/admin/azure_client")
     public ResponseData getAll() {
         return SuccessResult.of(clientModule.getAll());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/api/admin/azure_client/{id}")
     public ResponseData get(
             @PathVariable String id
     ) {
@@ -31,7 +31,7 @@ public class AzureClientController {
         return (dao != null) ? SuccessResult.of(dao) : FailedResult.NOT_FOUND;
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/api/admin/azure_client/{id}")
     public ResponseData save(
             @PathVariable String id,
             @RequestBody AzureClientDetailDto dto
@@ -40,19 +40,19 @@ public class AzureClientController {
         return save ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 
-    @PostMapping("/enabled/{id}")
+    @PostMapping("/api/admin/azure_client/enabled/{id}")
     private ResponseData setEnable(@PathVariable String id, Boolean enabled) {
         boolean setEnabled = clientModule.setEnabled(id, enabled);
         return setEnabled ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 
-    @PostMapping("/delete/{aClient}")
+    @PostMapping("/api/admin/azure_client/delete/{aClient}")
     public ResponseData delete(@PathVariable String aClient) {
         clientModule.delete(aClient);
         return SuccessResult.SAMPLE;
     }
 
-    @PostMapping("/default/{aClient}")
+    @PostMapping("/api/admin/azure_client/default/{aClient}")
     public ResponseData setDefault(@PathVariable String aClient) {
         boolean setDefault = clientModule.setDefault(aClient);
         return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;

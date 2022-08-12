@@ -1,66 +1,61 @@
 package io.github.driveindex.gateway.util;
 
 import io.github.driveindex.common.DriveIndexCommon;
-import io.jsonwebtoken.*;
+import io.github.driveindex.common.manager.ConfigManager;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.http.server.reactive.ServerHttpRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.context.annotation.Import;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
+import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
+import javax.annotation.PostConstruct;
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author sgpublic
  * @Date 2022/8/9 8:37
  */
+@Slf4j
+@Component
+@Import(ConfigManager.class)
+@DependsOn("ConfigManager")
 public class JwtChecker {
-    public static final String TOKEN_KEY = "DriveIndex-Authentication";
-    public static final String SECURITY_HEADER = "DriveIndex-User";
-    private static final JwtParser parser;
+    private static JwtParser parser;
 
-    static {
-        byte[] base = DriveIndexCommon.JWT_SECRET.getBytes(StandardCharsets.UTF_8);
-        if (base.length < 128) {
-            byte[] clone = base.clone();
-            base = new byte[128];
-            for (int i = 0; i < 128; i++) {
-                base[i] = clone[i % clone.length];
-            }
-        }
-        Key secretKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode(base));
+    @PostConstruct
+    protected void init() {
+        byte[] base = ConfigManager.getTokenSecurityKey();
+        Key secretKey = Keys.hmacShaKeyFor(base);
         parser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
 
     /**
-     * 从 ServerHttpRequest 中获取 token
-     * @return 返回 token 字符串，可能为 null
+     * 获取 token 中的 tag 信息
+     * @param token token 字符串，不可为 null
+     * @return 返回 tag，解析失败返回 null
      */
     @Nullable
-    public static String resolveToken(@NonNull ServerHttpRequest req) {
-        List<String> list = req.getHeaders().get(TOKEN_KEY);
-        if (list == null || list.isEmpty()) return null;
-        return list.get(0);
-    }
-
-    public static String getUsername(String token) {
-        return parser.parseClaimsJws(token).getBody().getSubject();
-    }
-
-    /**
-     * 校验 token
-     * @param token token 字符串，不可为 null
-     * @return 返回是否有效
-     */
-    public static boolean validateToken(@NonNull String token) {
+    public static String findTag(@NonNull String token) {
         try {
-            Jws<Claims> claims = parser.parseClaimsJws(token);
-            return !claims.getBody().getExpiration().before(new Date());
-        } catch (JwtException | IllegalArgumentException e) {
-            return false;
-        }
+            Claims claims = parser.parseClaimsJws(token).getBody();
+            if (claims.getExpiration().before(new Date())) {
+                log.debug("token 过期");
+                return null;
+            }
+            if (!DriveIndexCommon.APPLICATION_BASE_NAME.equals(claims.getIssuer())) {
+                log.debug("未知的 token 签发者");
+                return null;
+            }
+            String tag = claims.get(DriveIndexCommon.JWT_TAG, String.class);
+            return tag + "," + claims.getIssuedAt().getTime();
+        } catch (JwtException | IllegalArgumentException ignore) { }
+        return null;
     }
 }

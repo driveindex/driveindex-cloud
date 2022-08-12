@@ -7,13 +7,8 @@ spring:
         - id: azure-service
           uri: lb://azure-service
           predicates:
-            - Path=/api/azure/{segment}
-        - id: download-service
-          uri: lb://download-service
-          predicates:
-            - Path=/download
-            - Query=target
+            - Path=/api/azure/**,/download
         - id: admin-service
           uri: lb://admin-service
           predicates:
-            - Path=/api/login,/api/admin/{segment}
+            - Path=/api/login,/api/admin/**

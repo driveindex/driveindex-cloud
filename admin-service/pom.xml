@@ -11,10 +11,6 @@
 
     <artifactId>admin-service</artifactId>
 
-    <properties>
-        <jjwt.version>0.11.5</jjwt.version>
-    </properties>
-
     <dependencies>
         <!-- h2 数据库 -->
         <dependency>
@@ -34,6 +30,7 @@
             <artifactId>spring-boot-starter-security</artifactId>
         </dependency>
 
+        <!--jwt-->
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
             <artifactId>jjwt-api</artifactId>

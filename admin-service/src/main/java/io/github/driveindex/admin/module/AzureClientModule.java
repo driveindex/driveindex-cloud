@@ -6,6 +6,7 @@ import io.github.driveindex.admin.h2.repository.AzureClientRepository;
 import io.github.driveindex.common.dto.azure.drive.AccountDto;
 import io.github.driveindex.common.dto.azure.drive.AzureClientDetailDto;
 import io.github.driveindex.common.dto.azure.drive.AzureClientDto;
+import io.github.driveindex.common.util.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -51,8 +52,8 @@ public class AzureClientModule {
         }
         if (idExist) {
             AzureClientDao exist = client.selectById(id);
-            if (dto.getCalledName() != null) exist.setCalledName(dto.getCalledName());
-            if (dto.getClientSecret() != null) exist.setClientSecret(dto.getClientSecret());
+            Value.check(dto.getCalledName(), (exist::setCalledName));
+            Value.check(dto.getClientSecret(), (exist::setClientSecret));
             client.updateById(exist);
         } else {
             client.insert(AzureClientDao.of(id, dto));
@@ -60,12 +61,12 @@ public class AzureClientModule {
         return true;
     }
 
-    public boolean setEnabled(String id, boolean enabled) {
+    public boolean setEnabled(String id, Boolean enabled) {
         boolean idExist = client.exists(new QueryWrapper<AzureClientDao>()
                 .eq("id", id));
         if (!idExist) return false;
         AzureClientDao exist = client.selectById(id);
-        exist.setEnable(enabled);
+        Value.check(enabled, (exist::setEnable));
         client.updateById(exist);
         return true;
     }
@@ -78,7 +79,7 @@ public class AzureClientModule {
     public boolean setDefault(String aClient) {
         AzureClientDao clientDao = getById(aClient);
         if (clientDao == null) return false;
-        clientDao.setDefaultTargetFlag(System.currentTimeMillis());
+        Value.check(System.currentTimeMillis(), (clientDao::setDefaultTargetFlag));
         client.updateById(clientDao);
         return true;
     }

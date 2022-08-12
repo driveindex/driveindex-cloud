@@ -1,12 +1,17 @@
 package io.github.driveindex.admin.security;
 
-import io.github.driveindex.admin.security.jwt.JwtSecurityConfigurer;
+import io.github.driveindex.admin.security.jwt.JwtTokenAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.context.NullSecurityContextRepository;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * @author sgpublic
@@ -15,15 +20,14 @@ import org.springframework.security.web.context.NullSecurityContextRepository;
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
-    public static final String ROLE_USER = "user";
-    public static final String ROLE_ADMIN = "admin";
+    public static final String ROLE_ADMIN = "ADMIN";
+    public static final List<SimpleGrantedAuthority> AUTH_ADMIN =
+            Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + ROLE_ADMIN));
 
-    public static final String TOKEN_KEY = "DriveIndex-Authentication";
-    public static final String SECURITY_HEADER = "DriveIndex-User";
-
-    private final JwtSecurityConfigurer configurer;
     private final IAuthenticationEntryPoint entryPoint;
     private final IAccessDeniedHandler accessDeniedHandler;
+    private final JwtTokenAuthenticationFilter jwt;
+    private final PasswordOnlyAuthenticationProcessingFilter password;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -31,15 +35,16 @@ public class SecurityConfig {
                 .csrf().disable()
                 .httpBasic().disable()
                 .headers().frameOptions().disable();
+        http.addFilterBefore(password, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwt, PasswordOnlyAuthenticationProcessingFilter.class);
         http.sessionManagement().disable().securityContext()
                 .securityContextRepository(new NullSecurityContextRepository());
         http.authorizeHttpRequests()
-                .antMatchers("/api/admin/**").authenticated()
+                .antMatchers("/api/admin/**").hasRole(ROLE_ADMIN)
                 .anyRequest().permitAll();
         http.exceptionHandling()
                 .authenticationEntryPoint(entryPoint)
                 .accessDeniedHandler(accessDeniedHandler);
-        http.apply(configurer);
         return http.build();
     }
 }

@@ -1,9 +1,3 @@
-CREATE TABLE IF NOT EXISTS `user` (
-    `username` VARCHAR(30) NOT NULL DEFAULT 'driveindex',
-    `password` VARCHAR(60) NOT NULL DEFAULT 'driveindex',
-    PRIMARY KEY (`username`)
-);
-
 /*
  - id：
  该字段需当前上下文唯一，用于确定一个唯一的目标，体现在接口对目标的访问上
