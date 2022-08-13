@@ -42,11 +42,12 @@ public class ConfigManager {
     private static Ini ini;
 
     private static Profile.Section getSection(String sectionName) throws IOException {
+        ini.load();
         Profile.Section section = ini.get(sectionName);
         if (section == null) {
             ini.add(sectionName);
+            ini.store();
         }
-        ini.store();
         return ini.get(sectionName);
     }
 

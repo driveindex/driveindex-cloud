@@ -1,8 +1,6 @@
 package io.github.driveindex.common.util;
 
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.google.gson.*;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,6 +29,7 @@ public class GsonUtil {
 
     private static final Gson GSON = new GsonBuilder()
             .enableComplexMapKeySerialization()
+            .disableInnerClassSerialization()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .create();
 
@@ -38,11 +37,15 @@ public class GsonUtil {
         return GSON.toJson(object);
     }
 
+    public static <T extends Serializable> String toJson(T object, Class<T> clazz) {
+        return GSON.toJson(object, clazz);
+    }
+
     public static String fromMap(Map<?, ?> map) {
         return GSON.toJson(map);
     }
 
-    public static <T> T fromJson(String json, Class<T> clazz) {
+    public static <T extends Serializable> T fromJson(String json, Class<T> clazz) {
         return GSON.fromJson(json, clazz);
     }
 }

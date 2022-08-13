@@ -1,7 +1,9 @@
 package io.github.driveindex.admin.module;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import io.github.driveindex.admin.h2.dao.AccountTokenDao;
 import io.github.driveindex.admin.h2.dao.DriveConfigDao;
+import io.github.driveindex.admin.h2.repository.AccountTokenRepository;
 import io.github.driveindex.admin.h2.repository.DriveConfigRepository;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDto;
@@ -20,6 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Component
 public class DriveConfigModule {
+    private final AccountTokenRepository token;
     private final DriveConfigRepository config;
 
     public LinkedList<DriveConfigDto> getAll(String aClient, String aAccount) {
@@ -28,9 +31,10 @@ public class DriveConfigModule {
         for (DriveConfigDao drive : drives) {
             DriveConfigDto tmp = new DriveConfigDto();
             tmp.setId(drive.getId());
-            tmp.setDetail(drive);
+            tmp.setDetail(drive.clone());
             result.add(tmp);
         }
+        if (!result.isEmpty()) result.getFirst().setIsDefault(true);
         return result;
     }
 
@@ -41,10 +45,23 @@ public class DriveConfigModule {
 
     public boolean save(String aClient, String aAccount, String aConfig, DriveConfigDetailDto dto) {
         DriveConfigDao dao = getDriveConfig(aClient, aAccount, aConfig);
-        if (dao == null) return false;
-
-        Value.check(dto.getCalledName(), (dao::setCalledName));
-        Value.check(dto.getDirHome(), (dao::setDirHome));
+        if (dao == null) {
+            boolean accountExist = token.selectOne(new QueryWrapper<AccountTokenDao>().allEq(
+                    Map.of("parent_client", aClient, "id", aAccount)
+            )) != null;
+            if (!accountExist) return false;
+            dao = new DriveConfigDao();
+            Value.check(aConfig, (dao::setId));
+            Value.check(aClient, (dao::setParentClient));
+            Value.check(aAccount, (dao::setParentAccount));
+            Value.check(dto.getCalledName(), (dao::setCalledName));
+            Value.check(dto.getDirHome(), (dao::setDirHome));
+            config.insert(dao);
+        } else {
+            Value.check(dto.getCalledName(), (dao::setCalledName));
+            Value.check(dto.getDirHome(), (dao::setDirHome));
+            config.updateById(dao);
+        }
 
         return true;
     }

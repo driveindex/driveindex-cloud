@@ -15,6 +15,7 @@ public
 class AccountDto implements Serializable {
     private String id;
     private AccountDetailDto detail;
+    private Boolean isDefault = false;
 
     private List<DriveConfigDto> child;
 }

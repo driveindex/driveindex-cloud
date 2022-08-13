@@ -18,7 +18,7 @@ public class AdminServiceApplication {
         new DriveIndexCommon.Bootstrap(AdminServiceApplication.class)
                 .setPort(11423)
                 .setSqlSchema()
-                .setSqlData()
+//                .setSqlData()
                 .setDatasource("admin")
                 .run(args);
     }

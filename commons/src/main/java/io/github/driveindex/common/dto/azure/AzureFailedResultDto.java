@@ -10,7 +10,7 @@ import java.util.LinkedList;
  * @Date 2022/8/9 9:34
  */
 @Data
-public class FailedResultDto implements Serializable {
+public class AzureFailedResultDto implements Serializable {
     private String error;
     private String errorDescription;
     private LinkedList<Integer> errorCodes;

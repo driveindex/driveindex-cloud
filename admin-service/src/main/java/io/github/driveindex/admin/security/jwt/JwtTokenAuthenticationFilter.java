@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
@@ -31,33 +32,35 @@ import java.io.PrintWriter;
 @Component
 public class JwtTokenAuthenticationFilter extends GenericFilterBean {
     @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws IOException {
+    public void doFilter(ServletRequest req, ServletResponse res, FilterChain filterChain) throws ServletException, IOException {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(Charsets.UTF_8.name());
 
-        try {
-            String tag = request.getHeader(DriveIndexCommon.SECURITY_HEADER);
-            if (tag != null) {
-                String password = ConfigManager.getAdminPassword();
-                String[] security = ((HttpServletRequest) req)
-                        .getHeader(DriveIndexCommon.SECURITY_HEADER)
-                        .split(",");
-                String tagCheck = MD5Util.createTag(password, Long.parseLong(security[1]));
-                if (tagCheck.equals(security[0])) {
-                    PasswordOnlyToken auth = PasswordOnlyToken.authenticated(password, SecurityConfig.AUTH_ADMIN);
-                    SecurityContextHolder.getContext().setAuthentication(auth);
-                }
+        String tag = request.getHeader(DriveIndexCommon.SECURITY_HEADER);
+        if (tag != null) {
+            String password = ConfigManager.getAdminPassword();
+            String[] security = ((HttpServletRequest) req)
+                    .getHeader(DriveIndexCommon.SECURITY_HEADER)
+                    .split(",");
+            String tagCheck;
+            try {
+                tagCheck = MD5Util.createTag(password, Long.parseLong(security[1]));
+            } catch (Exception e) {
+                log.warn("校验认证 tag 出错", e);
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                PrintWriter writer = response.getWriter();
+                writer.write(FailedResult.EXPIRED_TOKEN.toString());
+                writer.flush();
+                return;
             }
-            filterChain.doFilter(req, res);
-        } catch (Exception e) {
-            log.warn("校验认证 tag 出错", e);
-            response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            PrintWriter writer = response.getWriter();
-            writer.write(FailedResult.EXPIRED_TOKEN.toString());
-            writer.flush();
+            if (tagCheck.equals(security[0])) {
+                PasswordOnlyToken auth = PasswordOnlyToken.authenticated(password, SecurityConfig.AUTH_ADMIN);
+                SecurityContextHolder.getContext().setAuthentication(auth);
+            }
         }
+        filterChain.doFilter(req, res);
     }
 }

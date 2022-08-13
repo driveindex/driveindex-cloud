@@ -1,8 +1,11 @@
 package io.github.driveindex.admin.h2.dao;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.driveindex.common.dto.azure.drive.AzureClientDetailDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.Date;
 
 /**
  * @author sgpublic
@@ -10,11 +13,12 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@TableName("azure_client")
 public class AzureClientDao extends AzureClientDetailDto {
     private String id;
     private Boolean enable;
 
-    private Long defaultTargetFlag;
+    private Long defaultTargetFlag = -(new Date().getTime());
 
     public static AzureClientDao of(String id, AzureClientDetailDto dto) {
         AzureClientDao dao = new AzureClientDao();

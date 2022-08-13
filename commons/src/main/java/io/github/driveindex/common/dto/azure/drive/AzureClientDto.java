@@ -13,6 +13,7 @@ import java.util.List;
 public class AzureClientDto implements Serializable {
     private String id;
     private AzureClientDetailDto detail;
+    private Boolean isDefault = false;
 
     private List<AccountDto> child;
 }

@@ -18,7 +18,6 @@ public class AzureServiceApplication {
         new DriveIndexCommon.Bootstrap(AzureServiceApplication.class)
                 .setPort(11421)
                 .setSqlSchema()
-                .setSqlData()
                 .setDatasource("azure")
                 .run(args);
     }

@@ -11,6 +11,6 @@ import java.io.Serializable;
 @Data
 public class DriveConfigDto implements Serializable {
     private String id;
-
     private DriveConfigDetailDto detail;
+    private Boolean isDefault = false;
 }

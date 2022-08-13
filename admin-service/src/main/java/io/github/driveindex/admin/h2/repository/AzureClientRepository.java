@@ -14,7 +14,7 @@ import java.util.LinkedList;
  */
 @Mapper
 public interface AzureClientRepository extends BaseMapper<AzureClientDao> {
-    @Select("select * from `account_token` order by `default_target_flag` desc")
+    @Select("select * from `azure_client` order by `default_target_flag` desc")
     LinkedList<AzureClientDao> getAll();
 
     @Nullable

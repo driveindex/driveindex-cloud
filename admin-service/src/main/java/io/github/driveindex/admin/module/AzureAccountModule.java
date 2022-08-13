@@ -2,11 +2,11 @@ package io.github.driveindex.admin.module;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.github.driveindex.admin.h2.dao.AccountTokenDao;
-import io.github.driveindex.admin.h2.dao.AzureClientDao;
 import io.github.driveindex.admin.h2.repository.AccountTokenRepository;
 import io.github.driveindex.admin.h2.repository.AzureClientRepository;
 import io.github.driveindex.common.dto.azure.common.AccountTokenDto;
 import io.github.driveindex.common.dto.azure.drive.AccountDetailDto;
+import io.github.driveindex.common.dto.azure.drive.AccountDto;
 import io.github.driveindex.common.util.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
@@ -26,16 +26,17 @@ public class AzureAccountModule {
     private final AccountTokenRepository token;
     private final DriveConfigModule drive;
 
-    public LinkedList<io.github.driveindex.common.dto.azure.drive.AccountDto> getAll(String aClient) {
-        LinkedList<io.github.driveindex.common.dto.azure.drive.AccountDto> result = new LinkedList<>();
+    public LinkedList<AccountDto> getAll(String aClient) {
+        LinkedList<AccountDto> result = new LinkedList<>();
         LinkedList<AccountTokenDao> accounts = token.getByClientId(aClient);
         for (AccountTokenDao account : accounts) {
-            io.github.driveindex.common.dto.azure.drive.AccountDto tmp = new io.github.driveindex.common.dto.azure.drive.AccountDto();
+            AccountDto tmp = new AccountDto();
             tmp.setId(account.getId());
-            tmp.setDetail(account);
+            tmp.setDetail(account.clone());
             tmp.setChild(drive.getAll(aClient, account.getId()));
             result.add(tmp);
         }
+        if (!result.isEmpty()) result.getFirst().setIsDefault(true);
         return result;
     }
 
@@ -46,11 +47,18 @@ public class AzureAccountModule {
 
     public boolean save(String aClient, String aAccount, AccountDetailDto dto) {
         AccountTokenDao account = getAccount(aClient, aAccount);
-        if (account == null) return false;
-        boolean clientExist = client.exists(new QueryWrapper<AzureClientDao>().eq("id", aClient));
-        if (!clientExist) return false;
-        Value.check(dto.getCalledName(), (account::setCalledName));
-        token.updateById(account);
+        if (account == null) {
+            boolean clientExist = client.selectById(aClient) != null;
+            if (!clientExist) return false;
+            account = new AccountTokenDao();
+            Value.check(aAccount, (account::setId));
+            Value.check(aClient, (account::setParentClientId));
+            Value.check(dto.getCalledName(), (account::setCalledName));
+            token.insert(account);
+        } else {
+            Value.check(dto.getCalledName(), (account::setCalledName));
+            token.updateById(account);
+        }
         return true;
     }
 

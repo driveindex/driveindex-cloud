@@ -9,7 +9,16 @@ import java.io.Serializable;
  * @Date 2022/8/7 17:02
  */
 @Data
-public class DriveConfigDetailDto implements Serializable {
+public class DriveConfigDetailDto implements Serializable, Cloneable {
     private String calledName;
     private String dirHome;
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    @Override
+    public DriveConfigDetailDto clone() {
+        DriveConfigDetailDto newObj = new DriveConfigDetailDto();
+        newObj.setCalledName(this.getCalledName());
+        newObj.setDirHome(this.getDirHome());
+        return newObj;
+    }
 }

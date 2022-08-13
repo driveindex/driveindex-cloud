@@ -15,7 +15,8 @@ CREATE TABLE IF NOT EXISTS `azure_client` (
     `called_name` TEXT NOT NULL,
     `client_id` VARCHAR(255) NOT NULL,
     `client_secret` TEXT NOT NULL,
-    `default_target_flag` TIMESTAMP NOT NULL,
+    `enable` BOOL NOT NULL DEFAULT TRUE,
+    `default_target_flag` LONG NOT NULL,
     PRIMARY KEY (`id`)
 );
 
@@ -29,7 +30,8 @@ CREATE TABLE IF NOT EXISTS `account_token` (
     `access_token` TEXT NOT NULL,
     `refresh_token` TEXT NOT NULL,
     `id_token` TEXT NOT NULL,
-    `default_target_flag` TIMESTAMP NOT NULL,
+    `enable` BOOL NOT NULL DEFAULT TRUE,
+    `default_target_flag` LONG NOT NULL,
     PRIMARY KEY (`parent_client`, `id`)
 );
 
@@ -39,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `drive_config` (
   `parent_account` VARCHAR(30) NOT NULL,
   `called_name` TEXT NOT NULL,
   `dir_home` TEXT NOT NULL,
-  `default_target_flag` TIMESTAMP NOT NULL,
+  `enable` BOOL NOT NULL DEFAULT TRUE,
+  `default_target_flag` LONG NOT NULL,
   PRIMARY KEY (`parent_client`, `parent_account`, `id`)
 );

@@ -1,8 +1,11 @@
 package io.github.driveindex.admin.h2.dao;
 
+import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.Date;
 
 /**
  * @author sgpublic
@@ -10,9 +13,13 @@ import lombok.EqualsAndHashCode;
  */
 @Data
 @EqualsAndHashCode(callSuper = true)
+@TableName("drive_config")
 public class DriveConfigDao extends DriveConfigDetailDto {
     private String id;
-    private Boolean enable;
+    private Boolean enable = true;
 
-    private Long defaultTargetFlag;
+    private String parentClient;
+    private String parentAccount;
+
+    private Long defaultTargetFlag = -(new Date().getTime());
 }
