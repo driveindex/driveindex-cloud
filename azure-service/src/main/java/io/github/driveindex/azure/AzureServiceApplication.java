@@ -1,7 +1,7 @@
 package io.github.driveindex.azure;
 
+import io.github.driveindex.common.DriveIndexCommon;
 import io.github.driveindex.common.util.GsonUtil;
-import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Import;
@@ -15,6 +15,11 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 public class AzureServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(AzureServiceApplication.class, args);
+        new DriveIndexCommon.Bootstrap(AzureServiceApplication.class)
+                .setPort(11421)
+                .setSqlSchema()
+                .setSqlData()
+                .setDatasource("azure")
+                .run(args);
     }
 }

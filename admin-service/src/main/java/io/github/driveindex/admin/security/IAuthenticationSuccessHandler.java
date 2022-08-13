@@ -4,6 +4,7 @@ import io.github.driveindex.admin.security.jwt.JwtUtil;
 import io.github.driveindex.common.dto.admin.AccessTokenDto;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.dto.result.SuccessResult;
+import io.github.driveindex.common.manager.ConfigManager;
 import kotlin.text.Charsets;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +30,11 @@ import java.security.NoSuchAlgorithmException;
 public class IAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        PasswordOnlyToken token = (PasswordOnlyToken) authentication;
         PrintWriter writer = response.getWriter();
         response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
         response.setCharacterEncoding(Charsets.UTF_8.name());
         try {
-            String jwt = JwtUtil.createToken((String) token.getPrincipal());
+            String jwt = JwtUtil.createToken(ConfigManager.getAdminPassword());
             AccessTokenDto dto = new AccessTokenDto();
             dto.setToken(jwt);
             writer.write(SuccessResult.of(dto).toString());

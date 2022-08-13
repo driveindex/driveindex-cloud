@@ -41,7 +41,7 @@ public class ConfigManager {
 
     private static Ini ini;
 
-    private static Profile.Section getInstance(String sectionName) throws IOException {
+    private static Profile.Section getSection(String sectionName) throws IOException {
         Profile.Section section = ini.get(sectionName);
         if (section == null) {
             ini.add(sectionName);
@@ -54,9 +54,9 @@ public class ConfigManager {
 
     private static final String KEY_PASSWORD = "password";
     public static final String DEFAULT_PASSWORD = "driveindex";
-    public static String getAdminPassword() throws IOException {
+    public static String getAdminPassword() {
         try {
-            return getInstance(SECTION_ADMIN)
+            return getSection(SECTION_ADMIN)
                     .getOrDefault(KEY_PASSWORD, DEFAULT_PASSWORD);
         } catch (Exception e) {
             log.warn("后台管理员密码配置信息获取失败，使用默认值", e);
@@ -64,7 +64,7 @@ public class ConfigManager {
         }
     }
     public static void setAdminPassword(String password) throws IOException {
-        Profile.Section section = getInstance(SECTION_ADMIN);
+        Profile.Section section = getSection(SECTION_ADMIN);
         section.put(KEY_PASSWORD, password);
         ini.put(SECTION_ADMIN, section);
         ini.store();
@@ -76,7 +76,7 @@ public class ConfigManager {
     public static byte[] getTokenSecurityKey() {
         byte[] base;
         try {
-            base = getInstance(SECTION_JWT)
+            base = getSection(SECTION_JWT)
                     .getOrDefault(KEY_JET_SECURITY, DriveIndexCommon.APPLICATION_BASE_NAME)
                     .getBytes(StandardCharsets.UTF_8);
         } catch (Exception e) {
@@ -97,7 +97,7 @@ public class ConfigManager {
     private static final long DEFAULT_JWT_EXPIRED = 3600_000;
     public static long getTokenExpired() {
         try {
-            String expired = getInstance(SECTION_JWT)
+            String expired = getSection(SECTION_JWT)
                     .getOrDefault(KEY_JWT_EXPIRED, Long.toString(DEFAULT_JWT_EXPIRED));
             return Long.parseLong(expired);
         } catch (Exception e) {

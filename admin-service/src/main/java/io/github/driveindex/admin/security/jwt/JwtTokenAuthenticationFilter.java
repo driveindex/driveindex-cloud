@@ -6,8 +6,11 @@ import io.github.driveindex.common.DriveIndexCommon;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.manager.ConfigManager;
 import io.github.driveindex.common.util.MD5Util;
+import kotlin.text.Charsets;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.GenericFilterBean;
@@ -32,9 +35,12 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
+        response.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding(Charsets.UTF_8.name());
+
         try {
-            String token = request.getHeader(DriveIndexCommon.SECURITY_HEADER);
-            if (token != null) {
+            String tag = request.getHeader(DriveIndexCommon.SECURITY_HEADER);
+            if (tag != null) {
                 String password = ConfigManager.getAdminPassword();
                 String[] security = ((HttpServletRequest) req)
                         .getHeader(DriveIndexCommon.SECURITY_HEADER)
@@ -47,6 +53,7 @@ public class JwtTokenAuthenticationFilter extends GenericFilterBean {
             }
             filterChain.doFilter(req, res);
         } catch (Exception e) {
+            log.warn("校验认证 tag 出错", e);
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             PrintWriter writer = response.getWriter();
             writer.write(FailedResult.EXPIRED_TOKEN.toString());

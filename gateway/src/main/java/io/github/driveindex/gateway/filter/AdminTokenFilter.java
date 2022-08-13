@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
@@ -61,7 +62,7 @@ public class AdminTokenFilter implements GlobalFilter {
 
         ServerHttpResponse response = exchange.getResponse();
         response.getHeaders().add(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE);
-        byte[] result = FailedResult.EXPIRED_TOKEN.toString().getBytes();
+        byte[] result = FailedResult.EXPIRED_TOKEN.toString().getBytes(StandardCharsets.UTF_8);
         return response.writeWith(Mono.just(response.bufferFactory().wrap(result)));
     }
 }
