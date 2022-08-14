@@ -16,7 +16,6 @@ import java.util.Date;
 @TableName("drive_config")
 public class DriveConfigDao extends DriveConfigDetailDto {
     private String id;
-    private Boolean enable = true;
 
     private String parentClient;
     private String parentAccount;

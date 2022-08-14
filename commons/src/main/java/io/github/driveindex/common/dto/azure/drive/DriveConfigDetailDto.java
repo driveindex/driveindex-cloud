@@ -12,6 +12,7 @@ import java.io.Serializable;
 public class DriveConfigDetailDto implements Serializable, Cloneable {
     private String calledName;
     private String dirHome;
+    private Boolean enable = true;
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
@@ -19,6 +20,7 @@ public class DriveConfigDetailDto implements Serializable, Cloneable {
         DriveConfigDetailDto newObj = new DriveConfigDetailDto();
         newObj.setCalledName(this.getCalledName());
         newObj.setDirHome(this.getDirHome());
+        newObj.setEnable(this.getEnable());
         return newObj;
     }
 }

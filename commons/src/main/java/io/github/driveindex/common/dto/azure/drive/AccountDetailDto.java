@@ -11,12 +11,16 @@ import java.io.Serializable;
 @Data
 public class AccountDetailDto implements Serializable, Cloneable {
     private String calledName;
+    private Boolean needLogin = true;
+    private Boolean enable = true;
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
     public AccountDetailDto clone() {
         AccountDetailDto newObj = new AccountDetailDto();
-        newObj.setCalledName(newObj.getCalledName());
+        newObj.setCalledName(this.getCalledName());
+        newObj.setNeedLogin(this.getNeedLogin());
+        newObj.setEnable(this.getEnable());
         return newObj;
     }
 }

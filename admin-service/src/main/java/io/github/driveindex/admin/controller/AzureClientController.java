@@ -40,12 +40,6 @@ public class AzureClientController {
         return save ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 
-    @PostMapping("/api/admin/azure_client/enabled/{id}")
-    private ResponseData setEnable(@PathVariable String id, Boolean enabled) {
-        boolean setEnabled = clientModule.setEnabled(id, enabled);
-        return setEnabled ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
-    }
-
     @PostMapping("/api/admin/azure_client/delete/{aClient}")
     public ResponseData delete(@PathVariable String aClient) {
         clientModule.delete(aClient);

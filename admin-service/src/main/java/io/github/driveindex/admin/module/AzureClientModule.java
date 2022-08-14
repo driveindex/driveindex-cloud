@@ -8,6 +8,7 @@ import io.github.driveindex.common.dto.azure.drive.AzureClientDto;
 import io.github.driveindex.common.util.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
 import java.util.LinkedList;
@@ -37,6 +38,7 @@ public class AzureClientModule {
         return result;
     }
 
+    @Nullable
     public AzureClientDao getById(@NonNull String id) {
         return client.getById(id);
     }
@@ -56,20 +58,12 @@ public class AzureClientModule {
             if (AzureClientDetailDto.PLACEHOLDER_CLIENT_SECRET.equals(clientSecret))
                 clientSecret = null;
             Value.check(clientSecret, (exist::setClientSecret));
+            Value.check(dto.getEnable(), (exist::setEnable));
             client.updateById(exist);
         } else {
-            client.insert(AzureClientDao.of(id, dto));
+            AzureClientDao dao = AzureClientDao.of(id, dto);
+            client.insert(dao);
         }
-        return true;
-    }
-
-    public boolean setEnabled(String id, Boolean enabled) {
-        boolean idExist = client.exists(new QueryWrapper<AzureClientDao>()
-                .eq("id", id));
-        if (!idExist) return false;
-        AzureClientDao exist = client.selectById(id);
-        Value.check(enabled, (exist::setEnable));
-        client.updateById(exist);
         return true;
     }
 

@@ -8,6 +8,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.GsonHttpMessageConverter;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Map;
@@ -45,7 +46,12 @@ public class GsonUtil {
         return GSON.toJson(map);
     }
 
-    public static <T extends Serializable> T fromJson(String json, Class<T> clazz) {
-        return GSON.fromJson(json, clazz);
+    public static <T> T fromJson(String json, Type type) {
+        return GSON.fromJson(json, type);
+    }
+
+    public static Map<String, Object> toMap(String json) {
+        //noinspection unchecked
+        return GSON.fromJson(json, Map.class);
     }
 }

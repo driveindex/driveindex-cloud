@@ -1,9 +1,11 @@
 package io.github.driveindex.admin.h2.dao;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import io.github.driveindex.common.dto.azure.common.AccountTokenDto;
+import io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+
+import java.util.Date;
 
 /**
  * @author sgpublic
@@ -12,10 +14,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 @TableName("account_token")
-public class AccountTokenDao extends AccountTokenDto {
+public class AccountTokenDao extends AccountTokenDto.Response {
     private String id;
-    private String parentClientId;
-    private Boolean enable;
+    private String parentClient;
 
-    private Long defaultTargetFlag;
+    private Long defaultTargetFlag = -(new Date().getTime());
 }

@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.github.driveindex.admin.h2.dao.AccountTokenDao;
 import io.github.driveindex.admin.h2.repository.AccountTokenRepository;
 import io.github.driveindex.admin.h2.repository.AzureClientRepository;
-import io.github.driveindex.common.dto.azure.common.AccountTokenDto;
+import io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto;
 import io.github.driveindex.common.dto.azure.drive.AccountDetailDto;
 import io.github.driveindex.common.dto.azure.drive.AccountDto;
 import io.github.driveindex.common.util.Value;
@@ -52,26 +52,28 @@ public class AzureAccountModule {
             if (!clientExist) return false;
             account = new AccountTokenDao();
             Value.check(aAccount, (account::setId));
-            Value.check(aClient, (account::setParentClientId));
+            Value.check(aClient, (account::setParentClient));
             Value.check(dto.getCalledName(), (account::setCalledName));
+            Value.check(dto.getEnable(), (account::setEnable));
             token.insert(account);
         } else {
             Value.check(dto.getCalledName(), (account::setCalledName));
+            Value.check(dto.getEnable(), (account::setEnable));
             token.updateById(account);
         }
         return true;
     }
 
-    public boolean saveToken(String aClient, String aAccount, AccountTokenDto tokenDto) {
+    public boolean saveToken(String aClient, String aAccount, AccountTokenDto.Response tokenDto) {
         AccountTokenDao account = getAccount(aClient, aAccount);
         if (account == null) return false;
 
         Value.check(tokenDto.getTokenType(), (account::setTokenType));
         Value.check(tokenDto.getAccessToken(), (account::setAccessToken));
         Value.check(tokenDto.getRefreshToken(), (account::setRefreshToken));
-        Value.check(tokenDto.getIdToken(), (account::setIdToken));
         Value.check(tokenDto.getScope(), (account::setScope));
-        Value.check(tokenDto.getExpiresIn(), (account::setExpiresIn));
+        Value.check(tokenDto.getExpiresIn(), (value -> account.setExpiresIn(System.currentTimeMillis() + value * 1000)));
+        account.setNeedLogin(false);
 
         token.updateById(account);
         return true;

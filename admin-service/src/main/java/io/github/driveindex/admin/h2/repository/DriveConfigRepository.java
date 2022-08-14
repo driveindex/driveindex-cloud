@@ -14,10 +14,10 @@ import java.util.LinkedList;
  */
 @Mapper
 public interface DriveConfigRepository extends BaseMapper<DriveConfigDao> {
-    @Select("select * from `account_token` where `parent_client`=#{aClient} and `parent_account`=#{aAccount} order by `default_target_flag` desc")
+    @Select("select * from `drive_config` where `parent_client`=#{aClient} and `parent_account`=#{aAccount} order by `default_target_flag` desc")
     LinkedList<DriveConfigDao> getByAccount(String aClient, String aAccount);
 
     @Nullable
-    @Select("select * from `account_token` where `parent_client`=#{aClient} and `parent_account`=#{aAccount} ans `id`=#{aConfig}")
+    @Select("select * from `drive_config` where `parent_client`=#{aClient} and `parent_account`=#{aAccount} and `id`=#{aConfig}")
     DriveConfigDao getByConfig(String aClient, String aAccount, String aConfig);
 }

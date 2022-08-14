@@ -1,35 +1,30 @@
 package io.github.driveindex.admin.feign;
 
-import kotlin.text.Charsets;
-import org.springframework.cloud.openfeign.FeignClient;
+import io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto;
+import io.github.driveindex.common.dto.azure.microsoft.DeviceCodeDto;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.net.URLEncoder;
 import java.util.Map;
 
 /**
  * @author sgpublic
  * @Date 2022/8/8 15:46
  */
-@FeignClient(name = "login-microsoftonlin", url = AzureTokenClient.BASE_URL)
 public interface AzureTokenClient {
     String BASE_URL = "https://login.microsoftonline.com";
+
+    String GRANT_TYPE_AUTHOR = "urn:ietf:params:oauth:grant-type:device_code";
     String GRANT_TYPE_REFRESH = "refresh_token";
 
-    String SCOPE = URLEncoder.encode("offline_access files.read.all", Charsets.UTF_8);
+    String SCOPE = "offline_access files.read.all";
 
-    @PostMapping("/common/oauth2/v2.0/devicecode")
-    Map<String, Object> getDeviceCode(
-            @RequestParam(name = "client_id") String clientId,
-            @RequestParam(name = "scope") String scope
-    );
+    @PostMapping(value = "/common/oauth2/v2.0/devicecode", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    Map<String, Object> getDeviceCode(DeviceCodeDto.Request dto);
 
-    @PostMapping("/common/oauth2/v2.0/token")
-    Map<String, Object> refreshToken(
-            @RequestParam(name = "client_id") String clientId,
-            @RequestParam(name = "client_secret") String clientSecret,
-            @RequestParam(name = "refresh_token") String refreshToken,
-            @RequestParam(name = "grant_type", defaultValue = GRANT_TYPE_REFRESH) String grantType
-    );
+    @PostMapping(value = "/common/oauth2/v2.0/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    Map<String, Object> getToken(DeviceCodeDto.Check dto);
+
+    @PostMapping(value = "/common/oauth2/v2.0/token", consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    Map<String, Object> refreshToken(AccountTokenDto.Request dto);
 }

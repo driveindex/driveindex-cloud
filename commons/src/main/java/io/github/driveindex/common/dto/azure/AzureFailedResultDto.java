@@ -3,7 +3,7 @@ package io.github.driveindex.common.dto.azure;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.LinkedList;
+import java.util.List;
 
 /**
  * @author sgpublic
@@ -13,7 +13,7 @@ import java.util.LinkedList;
 public class AzureFailedResultDto implements Serializable {
     private String error;
     private String errorDescription;
-    private LinkedList<Integer> errorCodes;
+    private List<Integer> errorCodes;
     private String timestamp;
     private String traceId;
     private String correlationId;

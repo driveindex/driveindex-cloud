@@ -59,7 +59,6 @@ public class DriveIndexCommon {
         }
 
         public void run(String[] args) {
-            properties.put("spring.jackson.property-naming-strategy", "SNAKE_CASE");
             application.setDefaultProperties(properties);
             application.run(args);
         }

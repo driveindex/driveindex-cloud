@@ -16,7 +16,6 @@ import java.util.Date;
 @TableName("azure_client")
 public class AzureClientDao extends AzureClientDetailDto {
     private String id;
-    private Boolean enable;
 
     private Long defaultTargetFlag = -(new Date().getTime());
 
@@ -27,6 +26,7 @@ public class AzureClientDao extends AzureClientDetailDto {
         dao.setCalledName(dto.getCalledName());
         dao.setClientId(dto.getClientId());
         dao.setClientSecret(dto.getClientSecret());
+        dao.setEnable(dto.getEnable());
         dao.setDefaultTargetFlag(-System.currentTimeMillis());
         return dao;
     }

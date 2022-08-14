@@ -56,10 +56,12 @@ public class DriveConfigModule {
             Value.check(aAccount, (dao::setParentAccount));
             Value.check(dto.getCalledName(), (dao::setCalledName));
             Value.check(dto.getDirHome(), (dao::setDirHome));
+            Value.check(dto.getEnable(), (dao::setEnable));
             config.insert(dao);
         } else {
             Value.check(dto.getCalledName(), (dao::setCalledName));
             Value.check(dto.getDirHome(), (dao::setDirHome));
+            Value.check(dto.getEnable(), (dao::setEnable));
             config.updateById(dao);
         }
 
