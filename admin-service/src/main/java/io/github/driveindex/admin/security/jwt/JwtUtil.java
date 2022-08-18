@@ -7,8 +7,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Import;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -23,8 +21,6 @@ import java.util.Date;
 
 @Slf4j
 @Component
-@Import(ConfigManager.class)
-@DependsOn("ConfigManager")
 public class JwtUtil {
     private static Key secretKey;
     private static Long expired;

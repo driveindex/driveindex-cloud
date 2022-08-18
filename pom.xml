@@ -119,6 +119,7 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</exclude>
+						<exclude>**/resource/application*.xml</exclude>
 					</excludes>
 				</configuration>
 			</plugin>

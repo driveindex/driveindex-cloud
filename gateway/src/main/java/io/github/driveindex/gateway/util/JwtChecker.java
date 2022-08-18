@@ -8,8 +8,6 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.Import;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
@@ -24,8 +22,6 @@ import java.util.Date;
  */
 @Slf4j
 @Component
-@Import(ConfigManager.class)
-@DependsOn("ConfigManager")
 public class JwtChecker {
     private static JwtParser parser;
 

@@ -14,7 +14,7 @@ public class AzureClientDetailDto implements Serializable, Cloneable {
 
     private String calledName;
     private String clientId;
-    private String clientSecret;
+//    private String clientSecret;
     private Boolean enable = true;
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
@@ -23,7 +23,7 @@ public class AzureClientDetailDto implements Serializable, Cloneable {
         AzureClientDetailDto newObj = new AzureClientDetailDto();
         newObj.setCalledName(this.getCalledName());
         newObj.setClientId(this.getClientId());
-        newObj.setClientSecret(this.getClientSecret());
+//        newObj.setClientSecret(this.getClientSecret());
         newObj.setEnable(this.getEnable());
         return newObj;
     }

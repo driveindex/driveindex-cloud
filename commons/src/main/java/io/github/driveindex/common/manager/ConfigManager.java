@@ -19,10 +19,10 @@ import java.util.Base64;
  */
 
 @Slf4j
-@Component("ConfigManager")
+@Component
 public class ConfigManager {
     private static final String CONFIG_NAME = "driveindex.ini";
-    private File config = new File("./conf", CONFIG_NAME);
+    private static File config = new File("./conf", CONFIG_NAME);
 
     @Value("${driveindex.config:./conf}")
     public void setConfigFile(String path) {
@@ -36,10 +36,11 @@ public class ConfigManager {
                 || !config.createNewFile())) {
             log.warn("配置文件创建失败，将使用默认配置！");
         }
-        ini = new Ini(config);
+        ini.setFile(config);
     }
 
-    private static Ini ini;
+    private static final Ini ini = new Ini();
+    static { ini.setFile(config); }
 
     private static Profile.Section getSection(String sectionName) throws IOException {
         ini.load();
@@ -104,6 +105,32 @@ public class ConfigManager {
         } catch (Exception e) {
             log.warn("token 时效配置信息获取失败，使用默认值", e);
             return DEFAULT_JWT_EXPIRED;
+        }
+    }
+
+    private static final String SECTION_CACHE = "cache";
+
+    private static final String KEY_CACHE_EXPIRES_IN = "expires_in";
+    private static final Integer DEFAULT_CACHE_EXPIRES_IN = 600;
+    public static Integer getCacheExpiresIn() {
+        try {
+            return getSection(SECTION_CACHE)
+                    .get(KEY_CACHE_EXPIRES_IN, Integer.class, DEFAULT_CACHE_EXPIRES_IN);
+        } catch (IOException e) {
+            log.warn("缓存时效信息获取失败，使用默认值", e);
+            return DEFAULT_CACHE_EXPIRES_IN;
+        }
+    }
+
+    private static final String KEY_CACHE_CLEAN_TICK_TIME = "expired";
+    private static final Integer DEFAULT_CACHE_CLEAN_TICK_TIME = 60;
+    public static Integer getCacheCleanTickTime() {
+        try {
+            return getSection(SECTION_CACHE)
+                    .get(KEY_CACHE_CLEAN_TICK_TIME, Integer.class, DEFAULT_CACHE_CLEAN_TICK_TIME);
+        } catch (IOException e) {
+            log.warn("缓存定时清理时间获取失败，使用默认值", e);
+            return DEFAULT_CACHE_CLEAN_TICK_TIME;
         }
     }
 }

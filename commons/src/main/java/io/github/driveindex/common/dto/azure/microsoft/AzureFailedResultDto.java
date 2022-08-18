@@ -1,4 +1,4 @@
-package io.github.driveindex.common.dto.azure;
+package io.github.driveindex.common.dto.azure.microsoft;
 
 import lombok.Data;
 

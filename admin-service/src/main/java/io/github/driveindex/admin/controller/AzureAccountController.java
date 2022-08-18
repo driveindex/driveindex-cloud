@@ -1,7 +1,6 @@
 package io.github.driveindex.admin.controller;
 
 import feign.codec.DecodeException;
-import io.github.driveindex.admin.configuration.FeignConfig;
 import io.github.driveindex.admin.feign.AzureTokenClient;
 import io.github.driveindex.admin.h2.dao.AccountTokenDao;
 import io.github.driveindex.admin.h2.dao.AzureClientDao;
@@ -14,9 +13,11 @@ import io.github.driveindex.common.dto.azure.microsoft.DeviceCodeDto;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
+import io.github.driveindex.common.exception.AzureDecodeException;
 import io.github.driveindex.common.util.GsonUtil;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
@@ -28,6 +29,7 @@ import java.util.Map;
  * @author sgpublic
  * @Date 2022/8/8 13:34
  */
+@Slf4j
 @RequiredArgsConstructor
 @RestController
 public class AzureAccountController {
@@ -73,6 +75,7 @@ public class AzureAccountController {
             deviceCodeDto.setTag(encode);
             return SuccessResult.of(deviceCodeDto);
         } catch (DecodeException e) {
+            log.warn("Device Code 申请出错！", e);
             return new FailedResult(-3002, "Device Code 申请出错：" + e.getMessage());
         }
     }
@@ -102,8 +105,9 @@ public class AzureAccountController {
             boolean saved = accountModule.saveToken(aClient, aAccount,
                     GsonUtil.fromJson(json, AccountTokenDto.Response.class));
             return saved ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
-        } catch (FeignConfig.AzureDecodeException e) {
+        } catch (AzureDecodeException e) {
             if ("authorization_pending".equals(e.getCode())) return LOGIN_PENDING;
+            log.warn("Device Code 检查出错！", e);
             return new FailedResult(-3003, "Device Code 检查出错：" + e.getMessage());
         }
     }

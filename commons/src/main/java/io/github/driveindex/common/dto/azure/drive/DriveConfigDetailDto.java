@@ -1,5 +1,6 @@
 package io.github.driveindex.common.dto.azure.drive;
 
+import io.github.driveindex.common.util.CanonicalPath;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,6 +14,12 @@ public class DriveConfigDetailDto implements Serializable, Cloneable {
     private String calledName;
     private String dirHome;
     private Boolean enable = true;
+    public void setCanonicalDirHome(CanonicalPath dirHome) {
+        this.dirHome = dirHome.getPath();
+    }
+    public CanonicalPath getCanonicalDirHome() {
+        return CanonicalPath.of(this.dirHome);
+    }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override

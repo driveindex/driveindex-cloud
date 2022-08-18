@@ -18,16 +18,4 @@ public class AzureClientDao extends AzureClientDetailDto {
     private String id;
 
     private Long defaultTargetFlag = -(new Date().getTime());
-
-    public static AzureClientDao of(String id, AzureClientDetailDto dto) {
-        AzureClientDao dao = new AzureClientDao();
-        dao.setId(id);
-        dao.setClientId(dto.getClientId());
-        dao.setCalledName(dto.getCalledName());
-        dao.setClientId(dto.getClientId());
-        dao.setClientSecret(dto.getClientSecret());
-        dao.setEnable(dto.getEnable());
-        dao.setDefaultTargetFlag(-System.currentTimeMillis());
-        return dao;
-    }
 }

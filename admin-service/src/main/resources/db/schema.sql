@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS `azure_client` (
 
 CREATE TABLE IF NOT EXISTS `account_token` (
     `id`  VARCHAR(30) NOT NULL,
-    `parent_client` VARCHAR(255) NOT NULL,
+    `parent_client` VARCHAR(30) NOT NULL,
     `called_name` VARCHAR(255) NOT NULL,
     `token_type` TEXT NOT NULL DEFAULT '',
     `expires_in` LONG NOT NULL DEFAULT 0,
@@ -32,16 +32,22 @@ CREATE TABLE IF NOT EXISTS `account_token` (
     `need_login` BOOL NOT NULL DEFAULT TRUE,
     `enable` BOOL NOT NULL DEFAULT TRUE,
     `default_target_flag` LONG NOT NULL,
-    PRIMARY KEY (`parent_client`, `id`)
+    PRIMARY KEY (`parent_client`, `id`),
+    FOREIGN KEY (`parent_client`)
+        REFERENCES `azure_client`(`id`)
+        ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS `drive_config` (
-  `id` VARCHAR(30) NOT NULL,
-  `parent_client` VARCHAR(255) NOT NULL,
-  `parent_account` VARCHAR(30) NOT NULL,
-  `called_name` TEXT NOT NULL,
-  `dir_home` TEXT NOT NULL,
-  `enable` BOOL NOT NULL DEFAULT TRUE,
-  `default_target_flag` LONG NOT NULL,
-  PRIMARY KEY (`parent_client`, `parent_account`, `id`)
+    `id` VARCHAR(30) NOT NULL,
+    `parent_client` VARCHAR(30) NOT NULL,
+    `parent_account` VARCHAR(30) NOT NULL,
+    `called_name` TEXT NOT NULL,
+    `dir_home` TEXT NOT NULL,
+    `enable` BOOL NOT NULL DEFAULT TRUE,
+    `default_target_flag` LONG NOT NULL,
+    PRIMARY KEY (`parent_client`, `parent_account`, `id`),
+    FOREIGN KEY (`parent_client`, `parent_account`)
+        REFERENCES `account_token`(`parent_client`, `id`)
+        ON DELETE CASCADE
 );

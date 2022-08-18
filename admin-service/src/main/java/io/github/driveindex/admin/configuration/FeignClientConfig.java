@@ -2,14 +2,14 @@ package io.github.driveindex.admin.configuration;
 
 import feign.Contract;
 import feign.Feign;
-import feign.Request;
 import feign.Response;
 import feign.codec.DecodeException;
 import feign.codec.Decoder;
 import feign.codec.Encoder;
 import feign.codec.ErrorDecoder;
 import io.github.driveindex.admin.feign.AzureTokenClient;
-import io.github.driveindex.common.dto.azure.AzureFailedResultDto;
+import io.github.driveindex.common.dto.azure.microsoft.AzureFailedResultDto;
+import io.github.driveindex.common.exception.AzureDecodeException;
 import io.github.driveindex.common.util.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,12 +24,12 @@ import java.nio.charset.StandardCharsets;
 
 /**
  * @author sgpublic
- * @Date 2022/8/14 12:59
+ * @Date 2022/8/14 19:18
  */
 @Import(FeignClientsConfiguration.class)
-@Configuration
 @RequiredArgsConstructor
-public class FeignConfig {
+@Configuration
+public class FeignClientConfig {
     private final Decoder decoder;
     private final Encoder encoder;
     private final Contract contract;
@@ -46,6 +46,8 @@ public class FeignConfig {
     @Slf4j
     @Component
     public static class AzureErrorDecoder implements ErrorDecoder {
+        private final ErrorDecoder.Default defaultDecoder = new Default();
+
         @Override
         public Exception decode(String s, Response response) {
             try (Reader input = response.body().asReader(StandardCharsets.UTF_8)) {
@@ -59,23 +61,12 @@ public class FeignConfig {
                         AzureFailedResultDto.class);
                 return new AzureDecodeException(response.status(), dto.getError(),
                         dto.getErrorDescription(), response.request());
+            } catch (RuntimeException e) {
+                return defaultDecoder.decode(s, response);
             } catch (Exception e) {
                 return new DecodeException(response.status(),
                         e.getMessage(), response.request(), e);
             }
-        }
-    }
-
-    public static class AzureDecodeException extends DecodeException {
-        private final String code;
-
-        public AzureDecodeException(int status, String code, String message, Request request) {
-            super(status, message, request);
-            this.code = code;
-        }
-
-        public String getCode() {
-            return code;
         }
     }
 }

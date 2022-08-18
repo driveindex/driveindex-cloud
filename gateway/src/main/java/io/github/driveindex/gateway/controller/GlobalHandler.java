@@ -5,16 +5,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.github.driveindex.common.dto.result.FailedResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.reactive.error.ErrorWebExceptionHandler;
 import org.springframework.cloud.gateway.support.NotFoundException;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.io.buffer.DataBufferFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -33,7 +32,7 @@ public class GlobalHandler implements ErrorWebExceptionHandler {
     @NonNull
     @Override
     public Mono<Void> handle(ServerWebExchange exchange, @NonNull Throwable throwable) {
-        ServerHttpResponse response = exchange.getResponse();
+        final ServerHttpResponse response = exchange.getResponse();
         if (response.isCommitted()) {
             return Mono.error(throwable);
         }
@@ -49,6 +48,10 @@ public class GlobalHandler implements ErrorWebExceptionHandler {
             try {
                 if (throwable instanceof NotFoundException) {
                     return bufferFactory.wrap(objectMapper.writeValueAsBytes(FailedResult.SERVICE_UNAVAILABLE));
+                }
+                if (throwable instanceof ResponseStatusException &&
+                        HttpStatus.NOT_FOUND.equals(((ResponseStatusException) throwable).getStatus())) {
+                    return bufferFactory.wrap(objectMapper.writeValueAsBytes(FailedResult.NOT_FOUND));
                 }
                 return bufferFactory.wrap(objectMapper.writeValueAsBytes(FailedResult.INTERNAL_SERVER_ERROR));
             } catch (JsonProcessingException e) {

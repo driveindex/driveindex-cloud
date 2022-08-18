@@ -1,5 +1,6 @@
 package io.github.driveindex.common.dto.azure.microsoft;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import feign.form.FormProperty;
 import io.github.driveindex.common.dto.azure.drive.AccountDetailDto;
 import lombok.Data;
@@ -20,14 +21,19 @@ public class AccountTokenDto {
         private String scope;
         private String accessToken;
         private String refreshToken;
+
+        @JsonIgnore
+        public Long getExpiresTime() {
+            return System.currentTimeMillis() + expiresIn * 1000;
+        }
     }
 
     @Data
     public static class Request implements Serializable {
         @FormProperty("client_id")
         private String clientId;
-        @FormProperty("client_secret")
-        private String clientSecret;
+//        @FormProperty("client_secret")
+//        private String clientSecret;
         @FormProperty("refresh_token")
         private String refreshToken;
         @FormProperty("grant_type")
