@@ -23,7 +23,7 @@ import java.util.Date;
 public class AzureCacheCentralService extends ServiceImpl<AzureCacheCentralMapper, CacheCentralEntity> {
     @Nullable
     public CacheCentralEntity getByPath(String path) {
-        return query().eq("canonical_path_hash", path.hashCode())
+        return query().eq("canonical_path_hash", path.toLowerCase().hashCode())
                 .gt(true, "expires_time", System.currentTimeMillis())
                 .one();
     }

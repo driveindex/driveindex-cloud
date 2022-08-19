@@ -70,9 +70,9 @@ public class AzureConfigController {
         }
         final DriveConfigDao driveDao;
         if (drive != null) {
-            driveDao = driveModule.getDriveConfig(client, account, drive);
+            driveDao = driveModule.getDriveConfig(client, accountDao.getId(), drive);
         } else {
-            driveDao = driveModule.getDefaultDriveConfig(client, account);
+            driveDao = driveModule.getDefaultDriveConfig(client, accountDao.getId());
         }
         AzureDriveDto result = new AzureDriveDto();
         result.setToken(createTokenDto(accountDao));

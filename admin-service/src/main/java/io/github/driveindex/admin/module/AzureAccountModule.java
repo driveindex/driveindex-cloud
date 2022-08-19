@@ -9,6 +9,7 @@ import io.github.driveindex.common.dto.azure.drive.AccountDto;
 import io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto;
 import io.github.driveindex.common.util.Value;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
@@ -27,7 +28,7 @@ public class AzureAccountModule {
     private final AccountTokenService token;
     private final DriveConfigModule drive;
 
-    public LinkedList<AccountDto> getAll(String aClient) {
+    public LinkedList<AccountDto> getAll(@NonNull String aClient) {
         LinkedList<AccountDto> result = new LinkedList<>();
         List<AccountTokenDao> accounts = token.getByClientId(aClient);
         for (AccountTokenDao account : accounts) {
@@ -42,16 +43,16 @@ public class AzureAccountModule {
     }
 
     @Nullable
-    public AccountTokenDao getDefault(String aClient) {
-        return token.getDefaultByClientId(aClient);
+    public AccountTokenDao getDefault(@NonNull String aClient) {
+        return token.getDefaultByClientId(aClient).orElse(null);
     }
 
     @Nullable
-    public AccountTokenDao getAccount(String aClient, String aAccount) {
-        return token.getByAccount(aClient, aAccount);
+    public AccountTokenDao getAccount(@NonNull String aClient, @NonNull String aAccount) {
+        return token.getByAccount(aClient, aAccount).orElse(null);
     }
 
-    public boolean save(String aClient, String aAccount, AccountDetailDto dto) {
+    public boolean save(@NonNull String aClient, @NonNull String aAccount, @NonNull AccountDetailDto dto) {
         AccountTokenDao account = getAccount(aClient, aAccount);
         if (account == null) {
             boolean clientExist = client.getById(aClient) != null;
@@ -66,7 +67,7 @@ public class AzureAccountModule {
         return true;
     }
 
-    public boolean saveToken(String aClient, String aAccount, AccountTokenDto.Response tokenDto) {
+    public boolean saveToken(@NonNull String aClient, @NonNull String aAccount, @NonNull AccountTokenDto.Response tokenDto) {
         AccountTokenDao account = getAccount(aClient, aAccount);
         if (account == null) return false;
 
@@ -80,18 +81,16 @@ public class AzureAccountModule {
         return true;
     }
 
-    public void save(AccountTokenDao dao) {
+    public void save(@NonNull AccountTokenDao dao) {
         if (getAccount(dao.getParentClient(), dao.getId()) == null) return;
         token.saveOrUpdate(dao);
     }
 
-    public boolean enable(String aClient, String aAccount, Boolean enabled) {
+    public boolean enable(@NonNull String aClient, @NonNull String aAccount, Boolean enabled) {
         AccountTokenDao account = getAccount(aClient, aAccount);
         if (account == null) return false;
-
-        AccountTokenDao exist = token.getByAccount(aClient, aAccount);
-        Value.check(enabled, (exist::setEnable));
-        token.updateById(exist);
+        Value.check(enabled, (account::setEnable));
+        token.updateById(account);
         return true;
     }
 

@@ -1,5 +1,6 @@
 package io.github.driveindex.azure.controller;
 
+import io.github.driveindex.azure.exception.PasswordNeededException;
 import io.github.driveindex.azure.h2.dao.CacheCentralEntity;
 import io.github.driveindex.azure.module.FileModule;
 import io.github.driveindex.common.dto.azure.file.AzureContentDto;
@@ -8,6 +9,7 @@ import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 
 /**
@@ -49,6 +52,8 @@ public class FileController {
         } catch (IOException | ParseException e) {
             log.warn("文件获取失败", e);
             return new FailedResult(-4001, e.getMessage());
+        } catch (PasswordNeededException e) {
+            return FailedResult.NOT_FOUND;
         }
     }
 
@@ -59,17 +64,33 @@ public class FileController {
             @RequestParam(required = false) String drive,
             @RequestParam String path,
             @RequestParam(required = false) String password,
+            @RequestParam(required = false) Boolean direct,
             HttpServletResponse response
     ) throws IOException {
-        try {
+        response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+        try (
+                PrintWriter writer = response.getWriter()
+        ) {
             String itemUrl = fileModule.getItemUrl(client, account, drive, path, password);
-            response.sendRedirect(itemUrl);
-        } catch (IOException | ParseException e) {
+            if (itemUrl == null) {
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                writer.write(FailedResult.NOT_FOUND.toString());
+                return;
+            }
+            if (direct == null || direct) {
+                response.sendRedirect(itemUrl);
+                return;
+            }
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            writer.write(SuccessResult.of(itemUrl).toString());
+        } catch (IOException | ParseException | PasswordNeededException e) {
             log.warn("文件获取失败", e);
             try (
                     PrintWriter writer = response.getWriter()
             ) {
-                writer.write(new FailedResult(-4001, e.getMessage()).toString());
+                writer.write((e instanceof PasswordNeededException
+                        ? FailedResult.WRONG_PASSWORD
+                        : new FailedResult(-4001, e.getMessage())).toString());
             }
         }
     }

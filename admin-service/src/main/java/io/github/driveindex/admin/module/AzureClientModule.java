@@ -29,7 +29,6 @@ public class AzureClientModule {
         for (AzureClientDao dao : all) {
             AzureClientDto tmp = new AzureClientDto();
             tmp.setId(dao.getId());
-//            dao.setClientSecret(AzureClientDetailDto.PLACEHOLDER_CLIENT_SECRET);
             tmp.setDetail(dao.clone());
             tmp.setChild(accountModule.getAll(dao.getId()));
             result.add(tmp);
@@ -40,7 +39,7 @@ public class AzureClientModule {
 
     @Nullable
     public AzureClientDao getDefault() {
-        return client.getDefault();
+        return client.getDefault().orElse(null);
     }
 
     @Nullable
@@ -59,12 +58,6 @@ public class AzureClientModule {
             dao = new AzureClientDao();
             dao.setId(id);
             dao.setClientId(dto.getClientId());
-//            dao.setClientSecret(dto.getClientSecret());
-//        } else {
-//            String clientSecret = dto.getClientSecret();
-//            if (AzureClientDetailDto.PLACEHOLDER_CLIENT_SECRET.equals(clientSecret))
-//                clientSecret = null;
-//            Value.check(clientSecret, (dao::setClientSecret));
         }
         dao.setCalledName(dto.getCalledName());
         dao.setClientId(dto.getClientId());
@@ -78,7 +71,7 @@ public class AzureClientModule {
         client.removeById(id);
     }
 
-    public boolean setDefault(String aClient) {
+    public boolean setDefault(@NonNull String aClient) {
         AzureClientDao clientDao = getById(aClient);
         if (clientDao == null) return false;
         Value.check(System.currentTimeMillis(), (clientDao::setDefaultTargetFlag));

@@ -2,8 +2,8 @@ package io.github.driveindex.common.manager;
 
 import io.github.driveindex.common.DriveIndexCommon;
 import lombok.extern.slf4j.Slf4j;
-import org.ini4j.Ini;
 import org.ini4j.Profile;
+import org.ini4j.Wini;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -39,7 +39,7 @@ public class ConfigManager {
         ini.setFile(config);
     }
 
-    private static final Ini ini = new Ini();
+    private static final Wini ini = new Wini();
     static { ini.setFile(config); }
 
     private static Profile.Section getSection(String sectionName) throws IOException {
@@ -99,9 +99,8 @@ public class ConfigManager {
     private static final long DEFAULT_JWT_EXPIRED = 3600_000;
     public static long getTokenExpired() {
         try {
-            String expired = getSection(SECTION_JWT)
-                    .getOrDefault(KEY_JWT_EXPIRED, Long.toString(DEFAULT_JWT_EXPIRED));
-            return Long.parseLong(expired);
+            return getSection(SECTION_JWT)
+                    .get(KEY_JWT_EXPIRED, Long.class, DEFAULT_JWT_EXPIRED);
         } catch (Exception e) {
             log.warn("token 时效配置信息获取失败，使用默认值", e);
             return DEFAULT_JWT_EXPIRED;

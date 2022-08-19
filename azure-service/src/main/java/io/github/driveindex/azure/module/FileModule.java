@@ -130,6 +130,7 @@ public class FileModule {
         return dto;
     }
 
+    @Nullable
     public String getItemUrl(
             @Nullable String client, @Nullable String account,
             @Nullable String drive, @NonNull String path,
@@ -210,7 +211,7 @@ public class FileModule {
         item.setCanonicalPath((fillPath == null)
                 ? CanonicalPath.ROOT_PATH
                 : fillPath.append(item.getName()).getPath());
-        item.setCanonicalPathHash(item.getCanonicalPath().hashCode());
+        item.setCanonicalPathHash(item.getCanonicalPath());
         //noinspection unchecked
         Map<String, Object> parentReference = (Map<String, Object>) index.get("parentReference");
         item.setParentId((String) parentReference.get("id"));

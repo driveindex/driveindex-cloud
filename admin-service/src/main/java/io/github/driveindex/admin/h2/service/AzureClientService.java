@@ -3,9 +3,11 @@ package io.github.driveindex.admin.h2.service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.driveindex.admin.h2.dao.AzureClientDao;
 import io.github.driveindex.admin.h2.mapper.AzureClientMapper;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author sgpublic
@@ -17,11 +19,13 @@ public class AzureClientService extends ServiceImpl<AzureClientMapper, AzureClie
         return list();
     }
 
-    public AzureClientDao getDefault() {
-        return query().orderBy(true, false, "default_target_flag").one();
+    public Optional<AzureClientDao> getDefault() {
+        return query().orderBy(true, false, "default_target_flag")
+                .last("limit 1")
+                .oneOpt();
     }
 
-    public boolean clientExists(String aClient) {
+    public boolean clientExists(@NonNull String aClient) {
         return query().eq("id", aClient).exists();
     }
 }

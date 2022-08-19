@@ -3,10 +3,12 @@ package io.github.driveindex.admin.h2.service;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import io.github.driveindex.admin.h2.dao.AccountTokenDao;
 import io.github.driveindex.admin.h2.mapper.AccountTokenMapper;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author sgpublic
@@ -14,25 +16,34 @@ import java.util.Map;
  */
 @Service
 public class AccountTokenService extends ServiceImpl<AccountTokenMapper, AccountTokenDao> {
-    public List<AccountTokenDao> getByClientId(String aClient) {
-        return query().eq("parent_client", aClient)
-                .orderBy(true, false, "default_target_flag").list();
-    }
-
-    public AccountTokenDao getDefaultByClientId(String aClient) {
+    public List<AccountTokenDao> getByClientId(@NonNull String aClient) {
         return query().eq("parent_client", aClient)
                 .orderBy(true, false, "default_target_flag")
-                .one();
+                .list();
     }
 
-    public AccountTokenDao getByAccount(String aClient, String aAccount) {
-        return query().allEq(Map.of("parent_client", aClient, "id", aAccount)).one();
+    public Optional<AccountTokenDao> getDefaultByClientId(@NonNull String aClient) {
+        return query().eq("parent_client", aClient)
+                .orderBy(true, false, "default_target_flag")
+                .last("limit 1")
+                .oneOpt();
     }
 
-    public boolean exists(String aClient, String aAccount) {
-        return query().allEq(Map.of(
-                "id", aAccount,
-                "parent_client", aClient
-        )).exists();
+    public Optional<AccountTokenDao> getByAccount(@NonNull String aClient, @NonNull String aAccount) {
+        return query()
+                .allEq(Map.of(
+                        "parent_client", aClient,
+                        "id", aAccount
+                ))
+                .oneOpt();
+    }
+
+    public boolean exists(@NonNull String aClient, @NonNull String aAccount) {
+        return query()
+                .allEq(Map.of(
+                        "id", aAccount,
+                        "parent_client", aClient
+                ))
+                .exists();
     }
 }

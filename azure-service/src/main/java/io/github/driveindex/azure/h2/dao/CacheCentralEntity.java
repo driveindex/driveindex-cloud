@@ -21,6 +21,14 @@ public class CacheCentralEntity extends AzureItemDto {
     private String parentId;
     private Long expiresTime = System.currentTimeMillis() + ConfigManager.getCacheExpiresIn() * 1000;
 
+    public void setCanonicalPathHash(Integer hash) {
+        canonicalPathHash = hash;
+    }
+
+    public void setCanonicalPathHash(String canonicalPath) {
+        canonicalPathHash = canonicalPath.toLowerCase().hashCode();
+    }
+
     public static final String MEDIA_TYPE_DIR = "directory";
     @JsonIgnore
     public boolean isFile() {

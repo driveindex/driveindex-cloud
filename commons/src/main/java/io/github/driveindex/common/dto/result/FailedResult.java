@@ -10,7 +10,7 @@ public class FailedResult extends ResponseData {
     }
 
     public static final FailedResult UNSUPPORTED_REQUEST = new FailedResult(-400, "不支持的请求方式");
-    public static final FailedResult WRONG_ACCOUNT = new FailedResult(-401, "密码错误");
+    public static final FailedResult WRONG_PASSWORD = new FailedResult(-401, "密码错误");
     public static final FailedResult ANONYMOUS_DENIED = new FailedResult(-405, "请登陆后再试");
     public static final FailedResult ACCESS_DENIED = new FailedResult(-406, "非常抱歉，您暂时不能访问");
     public static final FailedResult EXPIRED_TOKEN = new FailedResult(-402, "无效的 token");
