@@ -3,8 +3,9 @@ package io.github.driveindex.common;
 import org.springframework.boot.SpringApplication;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  * @author sgpublic
@@ -22,10 +23,14 @@ public class DriveIndexCommon {
     public static final String TOKEN_KEY = "DriveIndex-Authentication";
     public static final String SECURITY_HEADER = "DriveIndex-TAG";
 
+    public static Bootstrap Bootstrap(Class<?> clazz) {
+        return new Bootstrap(clazz);
+    }
+
     public static class Bootstrap {
         private final SpringApplication application;
 
-        public Bootstrap(Class<?> clazz) {
+        private Bootstrap(Class<?> clazz) {
             application = new SpringApplication(clazz);
         }
 
@@ -41,13 +46,17 @@ public class DriveIndexCommon {
             return this;
         }
 
-        public Bootstrap setSqlSchema() {
-            properties.put("spring.sql.init.schema-locations", List.of("classpath:/db/schema.sql"));
+        public Bootstrap setSqlSchema(String... name) {
+            properties.put("spring.sql.init.schema-locations",
+                    Stream.of(name).map((Function<String, Object>) s ->
+                            "classpath:/db/schema-" + s + ".sql").toList());
             return enableSqlInit();
         }
 
-        public Bootstrap setSqlData() {
-            properties.put("spring.sql.init.data-locations", List.of("classpath:/db/data.sql"));
+        public Bootstrap setSqlData(String name) {
+            properties.put("spring.sql.init.data-locations",
+                    Stream.of(name).map((Function<String, Object>) s ->
+                            "classpath:/db/data-" + s + ".sql").toList());
             return enableSqlInit();
         }
 
@@ -59,6 +68,7 @@ public class DriveIndexCommon {
         }
 
         public void run(String[] args) {
+            properties.put("spring.profile.active", "prod");
             application.setDefaultProperties(properties);
             application.run(args);
         }

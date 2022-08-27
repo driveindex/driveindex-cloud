@@ -3,6 +3,7 @@ package io.github.driveindex.common.dto.result;
 import io.github.driveindex.common.util.GsonUtil;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 
 /**
  * @author sgpublic
@@ -20,5 +21,9 @@ public abstract class ResponseData implements Serializable {
     @Override
     public String toString() {
         return GsonUtil.toJson(this);
+    }
+
+    public byte[] toBytes() {
+        return toString().getBytes(StandardCharsets.UTF_8);
     }
 }

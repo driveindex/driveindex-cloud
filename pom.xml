@@ -4,11 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>pom</packaging>
 	<modules>
-		<module>gateway</module>
-		<module>azure-service</module>
-        <module>commons</module>
-		<module>admin-service</module>
-		<module>logging-service</module>
+		<module>commons</module>
+
+		<module>gateway-module</module>
+		<module>azure-module</module>
+		<module>admin-module</module>
+
+		<module>boot</module>
+		<!--		<module>logging-service</module>-->
 	</modules>
 	<properties>
 		<maven.compiler.source>17</maven.compiler.source>
@@ -38,47 +41,11 @@
 	<description>DriveIndex 的 SpringCloud 实现</description>
 
 	<dependencies>
-		<!--SpringCloud 启动-->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-bootstrap</artifactId>
-		</dependency>
-		<!--注册中心-->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-consul-discovery</artifactId>
-		</dependency>
-		<!--配置中心-->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-consul-config</artifactId>
-		</dependency>
-		<!--服务健康检查-->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
-		</dependency>
 		<!--feign-->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>com.playtika.reactivefeign</groupId>-->
-<!--			<artifactId>feign-reactor-spring-configuration</artifactId>-->
-<!--			<version>${feign.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>com.playtika.reactivefeign</groupId>-->
-<!--			<artifactId>feign-reactor-core</artifactId>-->
-<!--			<version>${feign.version}</version>-->
-<!--		</dependency>-->
-<!--		<dependency>-->
-<!--			<groupId>com.playtika.reactivefeign</groupId>-->
-<!--			<artifactId>feign-reactor-webclient</artifactId>-->
-<!--			<version>${feign.version}</version>-->
-<!--		</dependency>-->
-		<!--lombok-->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
@@ -119,53 +86,7 @@
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 						</exclude>
-						<exclude>**/resource/application*.xml</exclude>
 					</excludes>
-				</configuration>
-			</plugin>
-			<!--docker打包-->
-			<plugin>
-				<groupId>com.google.cloud.tools</groupId>
-				<artifactId>jib-maven-plugin</artifactId>
-				<version>3.2.1</version>
-				<!--绑定到 maven Lifecycle-->
-				<executions>
-					<execution>
-						<id>package</id>
-						<phase>package</phase>
-						<goals>
-							<goal>buildTar</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>install</id>
-						<phase>install</phase>
-						<goals>
-							<goal>dockerBuild</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<skip>${build.skip}</skip>
-					<from>
-						<image>eclipse-temurin:17-jre-alpine</image>
-					</from>
-					<to>
-						<image>${docker-plugin.to.prefix}-${project.artifactId}:${project.version}</image>
-					</to>
-					<container>
-						<jvmFlags>
-							<jvmFlag>-Xms32m</jvmFlag>
-							<jvmFlag>-Xmx128g</jvmFlag>
-						</jvmFlags>
-						<volumes>/etc/driveindex/data</volumes>
-						<workingDirectory>/etc/driveindex</workingDirectory>
-						<environment>
-							<TZ>Asia/Shanghai</TZ>
-						</environment>
-						<creationTime>USE_CURRENT_TIMESTAMP</creationTime>
-						<format>OCI</format>
-					</container>
 				</configuration>
 			</plugin>
 		</plugins>

@@ -5,6 +5,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.filter.Filter;
 import ch.qos.logback.core.spi.FilterReply;
 import io.github.driveindex.common.DriveIndexCommon;
+import org.springframework.beans.factory.annotation.Value;
 
 /**
  * @author sgpublic
@@ -14,6 +15,7 @@ public class ConsoleFilter extends Filter<ILoggingEvent> {
     private Level self = Level.INFO;
     private Level out = Level.WARN;
 
+    @Value("${spring.profiles.active}")
     public void setProfileActive(String profile) {
         boolean check = "prod".equals(profile);
         self = check ? Level.INFO : Level.DEBUG;

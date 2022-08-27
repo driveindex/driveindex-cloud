@@ -45,13 +45,6 @@
         </encoder>
     </appender>
 
-<!--    <appender name="logging-service" class="io.github.driveindex.common.logback.appender.LoggingMQAppender">-->
-<!--        &lt;!&ndash;自定义过滤器，自动判断 debug 环境&ndash;&gt;-->
-<!--        <filter class="io.github.driveindex.common.logback.filter.ConsoleFilter">-->
-<!--            <profileActive>${profileActive}</profileActive>-->
-<!--        </filter>-->
-<!--    </appender>-->
-
     <root level="DEBUG">
         <appender-ref ref="console" />
         <appender-ref ref="file" />

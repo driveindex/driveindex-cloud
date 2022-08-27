@@ -1,0 +1,19 @@
+package io.github.driveindex;
+
+import io.github.driveindex.common.DriveIndexCommon;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+/**
+ * @author sgpublic
+ * @Date 2022/8/27 12:09
+ */
+@SpringBootApplication
+public class DriveIndexApplication {
+    public static void main(String[] args) {
+        DriveIndexCommon.Bootstrap(DriveIndexApplication.class)
+                .setSqlSchema("bootstrap", "admin", "azure")
+                .setPort(11411)
+                .setDatasource(DriveIndexCommon.APPLICATION_BASE_NAME.toLowerCase())
+                .run(args);
+    }
+}
