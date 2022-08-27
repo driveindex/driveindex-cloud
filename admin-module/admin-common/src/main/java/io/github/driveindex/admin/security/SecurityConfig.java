@@ -4,7 +4,6 @@ import io.github.driveindex.admin.security.jwt.JwtTokenAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -51,14 +50,9 @@ public class SecurityConfig {
         return http.build();
     }
 
-
-    private final Environment environment;
     private CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        List<String> activeProfiles = List.of(environment.getActiveProfiles());
-        if (activeProfiles.contains("dev")) {
-            configuration.addAllowedOrigin("*");
-        }
+        configuration.addAllowedOrigin("*");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

@@ -17,7 +17,7 @@ public class ConsoleFilter extends Filter<ILoggingEvent> {
 
     @Value("${spring.profiles.active}")
     public void setProfileActive(String profile) {
-        boolean check = "prod".equals(profile);
+        boolean check = !"dev".equals(profile);
         self = check ? Level.INFO : Level.DEBUG;
         out = check ? Level.WARN : Level.INFO;
     }

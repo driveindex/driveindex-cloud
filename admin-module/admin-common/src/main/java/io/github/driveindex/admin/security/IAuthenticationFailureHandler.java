@@ -1,12 +1,12 @@
 package io.github.driveindex.admin.security;
 
+import io.github.driveindex.admin.exception.WrongPasswordException;
 import io.github.driveindex.common.dto.result.FailedResult;
 import kotlin.text.Charsets;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationServiceException;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.stereotype.Component;
@@ -27,7 +27,7 @@ import java.util.Map;
 public class IAuthenticationFailureHandler implements AuthenticationFailureHandler {
     private static final Map<Class<? extends AuthenticationException>, FailedResult> result = new HashMap<>();
     static {
-        result.put(BadCredentialsException.class, FailedResult.WRONG_PASSWORD);
+        result.put(WrongPasswordException.class, FailedResult.WRONG_PASSWORD);
         result.put(AuthenticationServiceException.class, FailedResult.UNSUPPORTED_REQUEST);
     }
 
