@@ -18,4 +18,8 @@ public enum SpecialFile {
     public String toString() {
         return name;
     }
+
+    public boolean match(String fileName) {
+        return name.equals(fileName.toLowerCase());
+    }
 }

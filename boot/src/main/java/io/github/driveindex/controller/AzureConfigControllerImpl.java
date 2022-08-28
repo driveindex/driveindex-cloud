@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
+ * SpringBoot 不再需要远程调用接口获取信息，本地调用即可。
  * @author sgpublic
  * @Date 2022/8/27 14:14
  */

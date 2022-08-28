@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -27,14 +28,22 @@ public class ConfigManager {
     @Value("${driveindex.config:./conf}")
     public void setConfigFile(String path) {
         config = new File(path, CONFIG_NAME);
-        log.info("使用配置文件：" + config);
+        String configPath;
+        try {
+            configPath = config.getCanonicalPath();
+        } catch (IOException e) {
+            configPath = config.getPath();
+        }
+        log.info("使用配置文件：" + configPath);
     }
 
     @PostConstruct
     protected void init() throws IOException {
-        if (!config.exists() && (!config.getParentFile().mkdirs()
-                || !config.createNewFile())) {
-            log.warn("配置文件创建失败，将使用默认配置！");
+        if (!config.exists()) {
+            File parent = config.getParentFile();
+            if ((parent.exists() || !parent.mkdirs()) && !config.createNewFile()) {
+                log.warn("配置文件创建失败，将使用默认配置！");
+            }
         }
         ini.setFile(config);
     }
@@ -61,7 +70,8 @@ public class ConfigManager {
             return getSection(SECTION_ADMIN)
                     .getOrDefault(KEY_PASSWORD, DEFAULT_PASSWORD);
         } catch (Exception e) {
-            log.warn("后台管理员密码配置信息获取失败，使用默认值", e);
+            if (!(e instanceof FileNotFoundException))
+                log.warn("后台管理员密码配置信息获取失败，使用默认值", e);
             return DEFAULT_PASSWORD;
         }
     }
@@ -82,7 +92,8 @@ public class ConfigManager {
                     .getOrDefault(KEY_JET_SECURITY, DriveIndexCommon.APPLICATION_BASE_NAME)
                     .getBytes(StandardCharsets.UTF_8);
         } catch (Exception e) {
-            log.warn("token 加密密钥配置信息获取失败，使用默认值", e);
+            if (!(e instanceof FileNotFoundException))
+                log.warn("token 加密密钥配置信息获取失败，使用默认值", e);
             base = DriveIndexCommon.APPLICATION_BASE_NAME.getBytes(StandardCharsets.UTF_8);
         }
         if (base.length < 128) {
@@ -102,7 +113,8 @@ public class ConfigManager {
             return getSection(SECTION_JWT)
                     .get(KEY_JWT_EXPIRED, Long.class, DEFAULT_JWT_EXPIRED);
         } catch (Exception e) {
-            log.warn("token 时效配置信息获取失败，使用默认值", e);
+            if (!(e instanceof FileNotFoundException))
+                log.warn("token 时效配置信息获取失败，使用默认值", e);
             return DEFAULT_JWT_EXPIRED;
         }
     }

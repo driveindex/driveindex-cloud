@@ -18,6 +18,7 @@ import java.util.Map;
 public class ConfigClientImpl implements ConfigClient {
     private final AzureConfigController controller;
 
+    /** SpringBoot 不再需要远程调用接口获取信息，本地调用即可。 */
     @Override
     public Map<String, Object> getConfig(String client, String account, String drive) {
         ResponseData config = controller.getConfig(client, account, drive);

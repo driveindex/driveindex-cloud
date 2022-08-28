@@ -1,7 +1,6 @@
 package io.github.driveindex.azure.h2.dao;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.github.driveindex.common.dto.azure.file.AzureItemDto;
 import io.github.driveindex.common.manager.ConfigManager;
 import lombok.Data;
@@ -18,6 +17,7 @@ public class CacheCentralEntity extends AzureItemDto {
     private String canonicalPath;
     private Integer canonicalPathHash;
     private String mineType;
+    private Boolean isDir;
     private String parentId;
     private Long expiresTime = System.currentTimeMillis() + ConfigManager.getCacheExpiresIn() * 1000;
 
@@ -30,14 +30,6 @@ public class CacheCentralEntity extends AzureItemDto {
     }
 
     public static final String MEDIA_TYPE_DIR = "directory";
-    @JsonIgnore
-    public boolean isFile() {
-        return !MEDIA_TYPE_DIR.equals(getMineType());
-    }
-    @JsonIgnore
-    public boolean isDir() {
-        return MEDIA_TYPE_DIR.equals(getMineType());
-    }
 
     @Override
     public int hashCode() {

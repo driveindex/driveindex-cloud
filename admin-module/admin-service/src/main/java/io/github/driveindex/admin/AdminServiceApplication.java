@@ -1,6 +1,7 @@
 package io.github.driveindex.admin;
 
 import io.github.driveindex.common.DriveIndexCommon;
+import io.github.driveindex.common.configuration.MyBatisPagerConfig;
 import io.github.driveindex.common.manager.ConfigManager;
 import io.github.driveindex.common.util.GsonUtil;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -11,7 +12,7 @@ import org.springframework.context.annotation.Import;
  * @author sgpublic
  * @Date 2022/8/3 8:19
  */
-@Import({GsonUtil.class, ConfigManager.class})
+@Import({GsonUtil.class, ConfigManager.class, MyBatisPagerConfig.class})
 @EnableFeignClients
 @SpringBootApplication
 public class AdminServiceApplication {

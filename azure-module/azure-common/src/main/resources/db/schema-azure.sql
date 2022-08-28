@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS `cache_central` (
     `parent_id` VARCHAR(100),
     `name` TEXT NOT NULL,
     `mine_type` VARCHAR(100) NOT NULL,
+    `is_dir` BOOLEAN NOT NULL,
     `create_time` LONG NOT NULL,
     `modified_time` LONG NOT NULL,
     `size` LONG NOT NULL,
@@ -44,8 +45,8 @@ CREATE TABLE IF NOT EXISTS `dir_cache` (
 CREATE TABLE IF NOT EXISTS `file_cache` (
     `id` VARCHAR(100) NOT NULL,
     `quick_xor_hash` VARCHAR(255) NOT NULL,
-    `sha1_hash` VARCHAR(255) NOT NULL,
-    `sha256_hash` VARCHAR(255) NOT NULL,
+    `sha1_hash` VARCHAR(255) NOT NULL DEFAULT '',
+    `sha256_hash` VARCHAR(255) NOT NULL DEFAULT '',
     `download_url` TEXT NOT NULL,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`id`) REFERENCES `cache_central`(`id`) ON DELETE CASCADE
@@ -55,6 +56,7 @@ CREATE TABLE IF NOT EXISTS `file_cache` (
 CREATE TABLE IF NOT EXISTS `content_cache` (
     `id` VARCHAR(100),
     `parent_id` VARCHAR(100),
+    `type` VARCHAR(100),
     `content` TEXT,
     PRIMARY KEY (`id`),
     FOREIGN KEY (`parent_id`) REFERENCES `dir_cache`(`id`) ON DELETE CASCADE,

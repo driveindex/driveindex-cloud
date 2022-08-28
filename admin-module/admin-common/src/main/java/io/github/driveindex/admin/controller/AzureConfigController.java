@@ -7,7 +7,6 @@ import io.github.driveindex.admin.h2.dao.DriveConfigDao;
 import io.github.driveindex.admin.module.AzureAccountModule;
 import io.github.driveindex.admin.module.AzureClientModule;
 import io.github.driveindex.admin.module.DriveConfigModule;
-import io.github.driveindex.common.DriveIndexCommon;
 import io.github.driveindex.common.dto.azure.drive.AzureDriveDto;
 import io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto;
 import io.github.driveindex.common.dto.azure.microsoft.AzureTokenDto;
@@ -70,17 +69,14 @@ public abstract class AzureConfigController {
         } else {
             driveDao = driveModule.getDefaultDriveConfig(client, accountDao.getId());
         }
+        if (driveDao == null) {
+            return FailedResult.NOT_FOUND;
+        }
         AzureDriveDto result = new AzureDriveDto();
         result.setToken(createTokenDto(accountDao));
-        if (driveDao == null) {
-            result.setDirHome("");
-            result.getCalledName().setPrefix(DriveIndexCommon.APPLICATION_BASE_NAME);
-            result.getCalledName().setSuffix(accountDao.getCalledName());
-        } else {
-            result.setDirHome(driveDao.getDirHome());
-            result.getCalledName().setPrefix(accountDao.getCalledName());
-            result.getCalledName().setSuffix(driveDao.getCalledName());
-        }
+        result.setDirHome(driveDao.getDirHome());
+        result.getCalledName().setPrefix(accountDao.getCalledName());
+        result.getCalledName().setSuffix(driveDao.getCalledName());
         return SuccessResult.of(result);
     }
 

@@ -14,8 +14,7 @@ public class PageUtil {
             @Nullable Long pageSize,
             @Nullable Long pageIndex
     ) {
-        return new Page<T>()
-                .setCurrent(pageIndex == null ? 0 : pageIndex)
+        return new Page<T>().setCurrent(pageIndex == null ? 0 : pageIndex)
                 .setSize(pageSize == null ? DEFAULT_SIZE : pageSize);
     }
 }

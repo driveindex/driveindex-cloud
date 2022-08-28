@@ -7,6 +7,7 @@ import io.github.driveindex.azure.exception.PasswordTooLongException;
 import io.github.driveindex.azure.feign.AzureClient;
 import io.github.driveindex.azure.feign.ConfigClient;
 import io.github.driveindex.azure.h2.dao.CacheCentralEntity;
+import io.github.driveindex.azure.h2.dao.ContentCacheEntity;
 import io.github.driveindex.azure.h2.dao.DirCacheEntity;
 import io.github.driveindex.azure.h2.dao.FileCacheEntity;
 import io.github.driveindex.azure.h2.service.AzureCacheCentralService;
@@ -14,6 +15,7 @@ import io.github.driveindex.azure.h2.service.AzureContentCacheService;
 import io.github.driveindex.azure.h2.service.AzureDirCacheService;
 import io.github.driveindex.azure.h2.service.AzureFileCacheService;
 import io.github.driveindex.azure.util.PageUtil;
+import io.github.driveindex.azure.util.Sha1Util;
 import io.github.driveindex.common.dto.azure.drive.AzureDriveDto;
 import io.github.driveindex.common.dto.azure.file.*;
 import io.github.driveindex.common.exception.AzureDecodeException;
@@ -73,6 +75,9 @@ public class FileModule {
     ) throws AzureDecodeException, PasswordNeededException, IOException, ParseException {
         AzureDriveDto config = getConfig(client, account, drive);
         if (config == null) return null;
+        if (path.endsWith(SpecialFile._PASSWORD.toString()))
+            throw new FileNotFoundException("密码文件不允许下载！");
+
         CanonicalPath fillPath = checkPassword(
                 CanonicalPath.of(config.getDirHome()), CanonicalPath.of(path),
                 config.getToken().toString(), password
@@ -81,7 +86,7 @@ public class FileModule {
         final CacheCentralEntity item = getItem(fillPath, config.getToken().toString());
         if (item == null) throw new FileNotFoundException("文件不存在：\"" + fillPath.getPath() + "\"");
         AzureContentDto<?> dto;
-        if (item.isFile()) {
+        if (!item.getIsDir()) {
             FileItemDto itemDto = new FileItemDto();
             itemDto.setMineType(item.getMineType());
             itemDto.setDetail(fileCacheService.getById(item.getId()));
@@ -98,24 +103,17 @@ public class FileModule {
             );
             if (list == null) throw new FileNotFoundException("文件不存在");
 
-            if (sortBy == CacheCentralEntity.Sort.NAME) {
-                // 若按名称排序，则将文件夹提到前面
-                list.getRecords().sort((o1, o2) -> {
-                    if (o1.isDir() && o2.isFile()) return -1;
-                    if (o1.isFile() && o2.isDir()) return 1;
-                    return 0;
-                });
-            }
-
             List<FileItemDto> detail = new LinkedList<>();
             for (CacheCentralEntity index : list.getRecords()) {
+                // 从目录中排除 .password 文件
+                if (SpecialFile._PASSWORD.match(index.getName())) continue;
                 FileItemDto itemDto = new FileItemDto();
                 itemDto.setName(index.getName());
                 itemDto.setMineType(index.getMineType());
-                itemDto.setDetail(index.isFile()
-                        ? fileCacheService.getById(index.getId())
-                        : dirCacheService.getById(index.getId()));
-                itemDto.setInfo(item.clone());
+                itemDto.setDetail(index.getIsDir()
+                        ? dirCacheService.getById(index.getId())
+                        : fileCacheService.getById(index.getId()));
+                itemDto.setInfo(index.clone());
                 detail.add(itemDto);
             }
             DirContentDto dir = new DirContentDto();
@@ -143,7 +141,7 @@ public class FileModule {
                 config.getToken().toString(), password
         );
         CacheCentralEntity item = getItem(fillPath, config.getToken().toString());
-        if (item == null || !item.isFile()) return null;
+        if (item == null || item.getIsDir()) return null;
         return fileCacheService.getDownloadUrlById(item.getId());
     }
 
@@ -172,7 +170,7 @@ public class FileModule {
         CacheCentralEntity currentPath = getItem(fillPath, token);
         if (currentPath == null) return null;
         DirDetailDto dirCache = dirCacheService.getById(currentPath.getId());
-        if (currentPath.isFile()) throw new FileNotFoundException("不是一个文件夹");
+        if (!currentPath.getIsDir()) throw new FileNotFoundException("不是一个文件夹");
         Page<CacheCentralEntity> record = cacheCentralService
                 .pageByParentId(currentPath.getId(), page, sort, asc);
         if (record.getTotal() == dirCache.getChildCount()) return record;
@@ -187,7 +185,6 @@ public class FileModule {
         );
         //noinspection unchecked
         List<Map<String, Object>> value = (List<Map<String, Object>>) json.get("value");
-        log.debug("path: " + fillPath.getPath() + ", child count: " + value.size());
         for (Map<String, Object> index : value) {
             parseItem(index, fillPath);
         }
@@ -223,6 +220,7 @@ public class FileModule {
             //noinspection unchecked
             Map<String, Object> folder = (Map<String, Object>) index.get("folder");
             item.setMineType(CacheCentralEntity.MEDIA_TYPE_DIR);
+            item.setIsDir(true);
             DirCacheEntity entity = new DirCacheEntity();
             entity.setId(item.getId());
             entity.setChildCount(((Double) folder.get("childCount")).intValue());
@@ -232,6 +230,7 @@ public class FileModule {
             //noinspection unchecked
             Map<String, Object> file = (Map<String, Object>) index.get("file");
             item.setMineType((String) file.get("mimeType"));
+            item.setIsDir(false);
             FileCacheEntity entity = new FileCacheEntity();
             entity.setId(item.getId());
             entity.setDownloadUrl((String) index.get("@microsoft.graph.downloadUrl"));
@@ -249,10 +248,12 @@ public class FileModule {
             CanonicalPath dirHome, CanonicalPath currentPath,
             String token, String password
     ) throws IOException {
-        String passSet = findPassword(dirHome, currentPath, token);
+        String passSet = Sha1Util.convert(
+                findPassword(dirHome, currentPath, token)
+        );
         if (passSet != null && !passSet.equals(password)) {
-            log.warn("密码不匹配，\n密码路径：" + currentPath.getPath()
-                    + "\n  本地" + passSet + "，提交：" + password);
+            log.debug("密码不匹配，\n密码路径：" + currentPath.getPath()
+                    + "\n  本地：" + passSet + "，提交：" + password);
             throw new PasswordNeededException(currentPath.getPath());
         }
         return dirHome.append(currentPath);
@@ -266,7 +267,7 @@ public class FileModule {
         try {
             CacheCentralEntity item = getItem(dirHome.append(_password), token);
 
-            if (item == null || !item.isFile())
+            if (item == null || item.getIsDir())
                 return findPassword(dirHome, currentPath.getParentPath(), token);
 
             String downloadUrl = fileCacheService.getDownloadUrlById(item.getId());
@@ -306,7 +307,12 @@ public class FileModule {
                 builder.append(buffer, 0, read);
             } while ((read = reader.read(buffer)) > 0);
 
-            return builder.toString();
+            ContentCacheEntity entity = new ContentCacheEntity();
+            entity.setContent(builder.toString().trim());
+            entity.setType(name);
+            entity.setId(id);
+            contentCacheService.save(entity);
+            return entity.getContent();
         }
     }
 }

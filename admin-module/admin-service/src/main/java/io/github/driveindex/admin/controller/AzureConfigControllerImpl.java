@@ -7,6 +7,7 @@ import io.github.driveindex.admin.module.DriveConfigModule;
 import io.github.driveindex.common.dto.result.ResponseData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -23,7 +24,11 @@ public class AzureConfigControllerImpl extends AzureConfigController {
 
     @GetMapping("/config")
     @Override
-    public ResponseData getConfig(String client, String account, String drive) {
+    public ResponseData getConfig(
+            @RequestParam(required = false) String client,
+            @RequestParam(required = false) String account,
+            @RequestParam(required = false) String drive
+    ) {
         return super.getConfig(client, account, drive);
     }
 }

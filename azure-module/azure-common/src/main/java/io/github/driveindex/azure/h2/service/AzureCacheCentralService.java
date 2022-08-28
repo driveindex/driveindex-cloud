@@ -1,9 +1,9 @@
 package io.github.driveindex.azure.h2.service;
 
-import io.github.driveindex.azure.h2.dao.CacheCentralEntity;
-import io.github.driveindex.azure.h2.repository.AzureCacheCentralMapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import io.github.driveindex.azure.h2.dao.CacheCentralEntity;
+import io.github.driveindex.azure.h2.repository.AzureCacheCentralMapper;
 import io.github.driveindex.common.manager.ConfigManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -35,6 +35,8 @@ public class AzureCacheCentralService extends ServiceImpl<AzureCacheCentralMappe
     ) {
         return query().eq("parent_id", parentId)
                 .gt(true, "expires_time", System.currentTimeMillis())
+                // 若按名称排序，则将文件夹排在前面
+                .orderBy(sort.equals(CacheCentralEntity.Sort.NAME), !asc, "is_dir")
                 .orderBy(true, asc, sort.name().toLowerCase())
                 .page(page);
     }

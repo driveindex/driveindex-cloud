@@ -2,8 +2,10 @@ package io.github.driveindex.admin.security;
 
 import io.github.driveindex.admin.security.jwt.JwtTokenAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -20,6 +22,7 @@ import java.util.List;
  * @author sgpublic
  * @Date 2022/8/3 19:44
  */
+@Slf4j
 @RequiredArgsConstructor
 @Configuration
 public class SecurityConfig {
@@ -33,8 +36,15 @@ public class SecurityConfig {
     private final PasswordOnlyAuthenticationProcessingFilter password;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors().configurationSource(corsConfigurationSource());
+    public SecurityFilterChain filterChain(HttpSecurity http, Environment environment) throws Exception {
+        if (!environment.getProperty("spring.profiles.active", "prod").equals("prod")) {
+            // 测试环境允许跨域
+            http.cors().configurationSource(corsConfigurationSource());
+            if (environment.getProperty("spring.h2.console.enabled", Boolean.class, false)) {
+                // 若开启 h2-console 则允许 iframe
+                http.headers().frameOptions().disable();
+            }
+        }
         http.csrf().disable();
         http.httpBasic().disable();
         http.addFilterBefore(password, UsernamePasswordAuthenticationFilter.class)

@@ -9,6 +9,7 @@ import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -29,6 +30,8 @@ import java.text.ParseException;
 @RestController
 public class FileController {
     private final FileModule fileModule;
+
+    public static final FailedResult PASSWORD_NEEDED = new FailedResult(-4001, "文件被加密，请提交密码");
 
     @GetMapping("/api/azure/file")
     public ResponseData listFile(
@@ -53,7 +56,7 @@ public class FileController {
             log.warn("文件获取失败", e);
             return new FailedResult(-4001, e.getMessage());
         } catch (PasswordNeededException e) {
-            return FailedResult.NOT_FOUND;
+            return PASSWORD_NEEDED;
         }
     }
 
@@ -68,9 +71,8 @@ public class FileController {
             HttpServletResponse response
     ) throws IOException {
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
-        try (
-                PrintWriter writer = response.getWriter()
-        ) {
+        PrintWriter writer = response.getWriter();
+        try {
             String itemUrl = fileModule.getItemUrl(client, account, drive, path, password);
             if (itemUrl == null) {
                 response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -83,15 +85,14 @@ public class FileController {
             }
             response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             writer.write(SuccessResult.of(itemUrl).toString());
-        } catch (IOException | ParseException | PasswordNeededException e) {
+        } catch (IOException | ParseException e) {
             log.warn("文件获取失败", e);
-            try (
-                    PrintWriter writer = response.getWriter()
-            ) {
-                writer.write((e instanceof PasswordNeededException
-                        ? FailedResult.WRONG_PASSWORD
-                        : new FailedResult(-4001, e.getMessage())).toString());
-            }
+            writer.write(new FailedResult(-4002, e.getMessage()).toString());
+        } catch (PasswordNeededException e) {
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            writer.write(PASSWORD_NEEDED.toString());
+        } finally {
+            writer.close();
         }
     }
 }

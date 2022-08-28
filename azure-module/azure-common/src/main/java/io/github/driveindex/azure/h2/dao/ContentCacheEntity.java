@@ -13,5 +13,6 @@ import java.io.Serializable;
 @TableName("content_cache")
 public class ContentCacheEntity implements Serializable {
     private String id;
+    private String type;
     private String content;
 }

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class AzureContentCacheService extends ServiceImpl<AzureContentCacheMapper, ContentCacheEntity> {
     public String getContentById(String id) {
-        return super.getById(id).getContent();
+        ContentCacheEntity byId = super.getById(id);
+        return byId == null ? null : byId.getContent();
     }
 }
