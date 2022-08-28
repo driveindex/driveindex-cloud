@@ -1,0 +1,70 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo apt update -y
+        sudo apt install wget -y
+        sudo apt clean
+        sudo timedatectl set-timezone "Asia/Shanghai"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+
+    - name: Install JDK 17
+      uses: oracle-actions/setup-java@v1
+      with:
+        website: oracle.com
+        release: 17
+        version: 17
+
+    - name: Install Apache Maven
+      run: |
+        wget https://dlcdn.apache.org/maven/maven-3/3.8.6/binaries/apache-maven-3.8.6-bin.tar.gz
+        sudo mkdir -p /usr/local/maven
+        sudo tar -xzvf apache-maven-3.8.6-bin.tar.gz -C /usr/local/maven
+        sudo echo "" | sudo tee -a /etc/profile
+        sudo echo "# Maven 3.8.6" | sudo tee -a /etc/profile
+        sudo echo "M2_HOME=$(ls /usr/local/maven/apache-maven-3* -d)" | sudo tee -a /etc/profile
+        sudo echo "MAVEN_HOME=\$M2_HOME" | sudo tee -a /etc/profile
+        sudo echo "PATH=\$PATH:\$M2_HOME/bin" | sudo tee -a /etc/profile
+        sudo echo "export M2_HOME MAVEN_HOME PATH" | sudo tee -a /etc/profile
+
+    - name: Build with Maven
+      run: |
+        mvn clean package
+
+    - name: Organize files
+      run: |
+        mkdir -p target/cloud
+        cp $(find . -name "*-admin-service-bin.jar") ./target/cloud/admin-service-bin.jar
+        cp $(find . -name "*-azure-service-bin.jar") ./target/cloud/azure-service-bin.jar
+        cp $(find . -name "*-gateway-bin.jar") ./target/cloud/gateway-bin.jar
+        mkdir -p target/boot
+        cp $(find . -name "driveindex-boot-bin.jar") ./target/boot/driveindex-boot-bin.jar
+        tar -zcvf /workdir/driveindex-cloud.tar.gz ./target/cloud/*.jar --transform s=target/cloud/==
+        tar -zcvf /workdir/driveindex-boot.tar.gz ./target/boot/*.jar --transform s=target/boot/==
+
+    - name: Upload to release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        tag: ${{ github.ref }}
+        file: "/workdir/*"
+        overwrite: true
+        file_glob: true
