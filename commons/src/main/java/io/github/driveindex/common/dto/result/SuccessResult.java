@@ -1,6 +1,7 @@
 package io.github.driveindex.common.dto.result;
 
 import io.github.driveindex.common.util.GsonUtil;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -10,6 +11,7 @@ import java.io.Serializable;
  * @author sgpublic
  * @Date 2022/8/3 13:00
  */
+@Schema(description = "成功响应内容")
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class SuccessResult<T extends Serializable> extends SampleSuccessResult {
@@ -17,7 +19,7 @@ public class SuccessResult<T extends Serializable> extends SampleSuccessResult {
 
     private final T data;
 
-    private SuccessResult(T data) {
+    protected SuccessResult(T data) {
         this.data = data;
     }
 

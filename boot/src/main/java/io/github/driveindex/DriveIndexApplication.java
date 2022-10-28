@@ -14,6 +14,10 @@ public class DriveIndexApplication {
                 .setSqlSchema("bootstrap", "admin", "azure")
                 .setPort(11411)
                 .setDatasource(DriveIndexCommon.APPLICATION_BASE_NAME.toLowerCase())
+                .addSpringDocScan("io.github.driveindex.controller")
+                .addSpringDocScan("io.github.driveindex.admin.controller")
+                .addSpringDocScan("io.github.driveindex.azure.controller")
+                .addSpringDocScan("io.github.driveindex.common.controller")
                 .run(args);
     }
 }

@@ -15,6 +15,11 @@ import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
 import io.github.driveindex.common.exception.AzureDecodeException;
 import io.github.driveindex.common.util.GsonUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +34,7 @@ import java.util.Map;
  * @author sgpublic
  * @Date 2022/8/8 13:34
  */
+@Tag(name = "微软账号配置")
 @Slf4j
 @RequiredArgsConstructor
 @RestController
@@ -37,9 +43,12 @@ public class AzureAccountController {
     private final AzureAccountModule accountModule;
     private final AzureTokenClient feign;
 
+    @Operation(summary = "创建账号配置", description = "新建一个账号配置")
     @PostMapping("/api/admin/azure_account/{aClient}/{aAccount}")
     public ResponseData saveAccount(
+            @Schema(description = "Client 配置 ID")
             @PathVariable String aClient,
+            @Schema(description = "账号配置 ID")
             @PathVariable String aAccount,
             @RequestBody AccountDetailDto calledName
     ) {
@@ -52,9 +61,18 @@ public class AzureAccountController {
         private String deviceCode;
     }
 
+
+    @Operation(
+            summary = "获取登陆 DeviceCode", description = "获取用户用于登陆微软账号所需的 DeviceCode",
+            responses = @ApiResponse(content = @Content(schema = @Schema(
+                    implementation = DeviceCodeDto.Response.class
+            )))
+    )
     @GetMapping("/api/admin/azure_account/device_code/{aClient}/{aAccount}")
     public ResponseData onDeviceCode(
+            @Schema(description = "Client 配置 ID")
             @PathVariable String aClient,
+            @Schema(description = "账号配置 ID")
             @PathVariable String aAccount
     ) {
         AccountTokenDao account = accountModule.getAccount(aClient, aAccount);
@@ -82,9 +100,12 @@ public class AzureAccountController {
 
     private static final FailedResult LOGIN_PENDING = new FailedResult(-3001, "用户暂未完成登录");
 
+    @Operation(summary = "检查 DeviceCode 结果", description = "检查目标 DeviceCode 操作结果")
     @PostMapping("/api/admin/azure_account/check_code/{aClient}/{aAccount}")
     public ResponseData onCheckDeviceCode(
+            @Schema(description = "Client 配置 ID")
             @PathVariable String aClient,
+            @Schema(description = "账号配置 ID")
             @PathVariable String aAccount,
             @RequestBody DeviceCodeCheckDto dto
     ) {
@@ -112,21 +133,26 @@ public class AzureAccountController {
         }
     }
 
-
-    @PostMapping("/api/admin/azure_account/enabled/{aClient}/{aAccount}")
-    public ResponseData enable(@PathVariable String aClient, @PathVariable String aAccount, Boolean enabled) {
-        boolean setEnable = accountModule.enable(aClient, aAccount, enabled);
-        return setEnable ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
-    }
-
+    @Operation(summary = "删除账号配置", description = "删除一个账号配置")
     @PostMapping("/api/admin/azure_account/delete/{aClient}/{aAccount}")
-    public ResponseData delete(@PathVariable String aClient, @PathVariable String aAccount) {
+    public ResponseData delete(
+            @Schema(description = "Client 配置 ID")
+            @PathVariable String aClient,
+            @Schema(description = "账号配置 ID")
+            @PathVariable String aAccount
+    ) {
         accountModule.delete(aClient, aAccount);
         return SuccessResult.SAMPLE;
     }
 
+    @Operation(summary = "设置默认账号配置", description = "设置一个账号配置为默认")
     @PostMapping("/api/admin/azure_account/default/{aClient}/{aAccount}")
-    public ResponseData setDefault(@PathVariable String aClient, @PathVariable String aAccount) {
+    public ResponseData setDefault(
+            @Schema(description = "Client 配置 ID")
+            @PathVariable String aClient,
+            @Schema(description = "账号配置 ID")
+            @PathVariable String aAccount
+    ) {
         boolean setDefault = accountModule.setDefault(aClient, aAccount);
         return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }

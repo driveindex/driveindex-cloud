@@ -5,6 +5,9 @@ import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,16 +18,21 @@ import org.springframework.web.bind.annotation.RestController;
  * @author sgpublic
  * @Date 2022/8/9 12:04
  */
+@Tag(name = "目录配置")
 @RequiredArgsConstructor
 @RestController
 public class DriveConfigController {
     private final DriveConfigModule configModule;
 
 
+    @Operation(summary = "创建目录配置", description = "新建一个目录配置")
     @PostMapping("/api/admin/drive_config/{aClient}/{aAccount}/{aDrive}")
     public ResponseData saveDrive(
+            @Schema(description = "Client 配置 ID")
             @PathVariable String aClient,
+            @Schema(description = "账号配置 ID")
             @PathVariable String aAccount,
+            @Schema(description = "目录配置 ID")
             @PathVariable String aDrive,
             @RequestBody DriveConfigDetailDto dto
     ) {
@@ -32,35 +40,31 @@ public class DriveConfigController {
         return save ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 
-
-    @PostMapping("/api/admin/drive_config/enabled/{aClient}/{aAccount}/{aDrive}")
-    public ResponseData enable(
-            @PathVariable String aClient,
-            @PathVariable String aAccount,
-            @PathVariable String aDrive,
-            Boolean enabled
-    ) {
-        boolean setEnable = configModule.enable(aClient, aAccount, aDrive, enabled);
-        return setEnable ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
-    }
-
-    @PostMapping("/api/admin/drive_config/delete/{aClient}/{aAccount}/{aConfig}")
+    @Operation(summary = "删除目录配置", description = "删除一个目录配置")
+    @PostMapping("/api/admin/drive_config/delete/{aClient}/{aAccount}/{aDrive}")
     public ResponseData delete(
+            @Schema(description = "Client 配置 ID")
             @PathVariable String aClient,
+            @Schema(description = "账号配置 ID")
             @PathVariable String aAccount,
-            @PathVariable String aConfig
+            @Schema(description = "目录配置 ID")
+            @PathVariable String aDrive
     ) {
-        configModule.delete(aClient, aAccount, aConfig);
+        configModule.delete(aClient, aAccount, aDrive);
         return SuccessResult.SAMPLE;
     }
 
-    @PostMapping("/api/admin/drive_config/default/{aClient}/{aAccount}/{aConfig}")
+    @Operation(summary = "设置默认目录配置", description = "设置一个目录配置为默认")
+    @PostMapping("/api/admin/drive_config/default/{aClient}/{aAccount}/{aDrive}")
     public ResponseData setDefault(
+            @Schema(description = "Client 配置 ID")
             @PathVariable String aClient,
+            @Schema(description = "账号配置 ID")
             @PathVariable String aAccount,
-            @PathVariable String aConfig
+            @Schema(description = "目录配置 ID")
+            @PathVariable String aDrive
     ) {
-        boolean setDefault = configModule.setDefault(aClient, aAccount, aConfig);
+        boolean setDefault = configModule.setDefault(aClient, aAccount, aDrive);
         return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
     }
 }

@@ -1,5 +1,6 @@
 package io.github.driveindex.common.dto.azure.file;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

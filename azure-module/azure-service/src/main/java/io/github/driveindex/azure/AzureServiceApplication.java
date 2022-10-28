@@ -23,6 +23,7 @@ public class AzureServiceApplication {
                 .setPort(11422)
                 .setSqlSchema("bootstrap", "azure")
                 .setDatasource("azure")
+                .addSpringDocScan("io.github.driveindex.azure.controller")
                 .run(args);
     }
 }

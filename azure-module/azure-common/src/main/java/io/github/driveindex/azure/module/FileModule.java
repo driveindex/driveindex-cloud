@@ -103,7 +103,7 @@ public class FileModule {
             );
             if (list == null) throw new FileNotFoundException("文件不存在");
 
-            List<FileItemDto> detail = new LinkedList<>();
+            DirContentDto.FileList detail = new DirContentDto.FileList();
             for (CacheCentralEntity index : list.getRecords()) {
                 // 从目录中排除 .password 文件
                 if (SpecialFile._PASSWORD.match(index.getName())) continue;

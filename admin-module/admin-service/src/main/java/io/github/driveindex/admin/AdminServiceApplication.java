@@ -21,6 +21,7 @@ public class AdminServiceApplication {
                 .setPort(11421)
                 .setSqlSchema("bootstrap", "admin")
                 .setDatasource("admin")
+                .addSpringDocScan("io.github.driveindex.admin.controller")
                 .run(args);
     }
 }

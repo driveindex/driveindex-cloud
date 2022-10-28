@@ -1,6 +1,7 @@
 package io.github.driveindex.common.dto.azure.drive;
 
 import io.github.driveindex.common.util.CanonicalPath;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -11,8 +12,11 @@ import java.io.Serializable;
  */
 @Data
 public class DriveConfigDetailDto implements Serializable, Cloneable {
+    @Schema(description = "目录配置代号")
     private String calledName;
+    @Schema(description = "起始目录")
     private String dirHome;
+    @Schema(description = "是否启用")
     private Boolean enable = true;
     public void setCanonicalDirHome(CanonicalPath dirHome) {
         this.dirHome = dirHome.getPath();

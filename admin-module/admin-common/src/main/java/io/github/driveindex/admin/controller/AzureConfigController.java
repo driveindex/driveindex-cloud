@@ -15,8 +15,11 @@ import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
 import io.github.driveindex.common.exception.AzureDecodeException;
 import io.github.driveindex.common.util.GsonUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
@@ -33,24 +36,20 @@ public abstract class AzureConfigController {
     private final DriveConfigModule driveModule;
     private final AzureTokenClient tokenClient;
 
-    public ResponseData getConfig(
-            @RequestParam(required = false) String client,
-            @RequestParam(required = false) String account,
-            @RequestParam(required = false) String drive
-    ) {
-        if (client == null || client.isBlank()) {
+    public ResponseData getConfig(String aClient, String aAccount, String aDrive) {
+        if (aClient == null || aClient.isBlank()) {
             AzureClientDao defaultClient = clientModule.getDefault();
             if (defaultClient == null) {
                 return FailedResult.NOT_FOUND;
             }
-            client = defaultClient.getId();
+            aClient = defaultClient.getId();
         }
         final AccountTokenDao accountDao;
         synchronized (accountModule) {
-            if (account == null || account.isBlank()) {
-                accountDao = accountModule.getDefault(client);
+            if (aAccount == null || aAccount.isBlank()) {
+                accountDao = accountModule.getDefault(aClient);
             } else {
-                accountDao = accountModule.getAccount(client, account);
+                accountDao = accountModule.getAccount(aClient, aAccount);
             }
             if (accountDao == null) {
                 return FailedResult.NOT_FOUND;
@@ -64,10 +63,10 @@ public abstract class AzureConfigController {
             }
         }
         final DriveConfigDao driveDao;
-        if (drive != null) {
-            driveDao = driveModule.getDriveConfig(client, accountDao.getId(), drive);
+        if (aDrive != null) {
+            driveDao = driveModule.getDriveConfig(aClient, accountDao.getId(), aDrive);
         } else {
-            driveDao = driveModule.getDefaultDriveConfig(client, accountDao.getId());
+            driveDao = driveModule.getDefaultDriveConfig(aClient, accountDao.getId());
         }
         if (driveDao == null) {
             return FailedResult.NOT_FOUND;

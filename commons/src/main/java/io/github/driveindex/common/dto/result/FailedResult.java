@@ -1,9 +1,12 @@
 package io.github.driveindex.common.dto.result;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 /**
  * @author sgpublic
  * @Date 2022/8/3 12:54
  */
+@Schema(description = "错误响应内容")
 public class FailedResult extends ResponseData {
     public FailedResult(Integer code, String message) {
         super(code, message);
