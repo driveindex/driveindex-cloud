@@ -1,6 +1,8 @@
 package io.github.driveindex.admin.security;
 
 import io.github.driveindex.admin.security.jwt.JwtTokenAuthenticationFilter;
+import kotlin.Lazy;
+import kotlin.LazyKt;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -33,20 +35,21 @@ public class SecurityConfig {
     private final IAccessDeniedHandler accessDeniedHandler;
     private final JwtTokenAuthenticationFilter jwt;
     private final PasswordOnlyAuthenticationProcessingFilter password;
-    private final UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
+    private static final Lazy<UrlBasedCorsConfigurationSource> corsConfigurationSource =
+            LazyKt.lazy(UrlBasedCorsConfigurationSource::new);
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, Environment environment) throws Exception {
-        corsConfigurationSource.registerCorsConfiguration("/download", corsConfiguration());
+        registerCorsConfiguration("/download");
         if (!environment.getProperty("spring.profiles.active", "prod").equals("prod")) {
-            corsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration());
+            registerCorsConfiguration("/**");
             // 测试环境允许跨域
             if (environment.getProperty("spring.h2.console.enabled", Boolean.class, false)) {
                 // 若开启 h2-console 则允许 iframe
                 http.headers().frameOptions().disable();
             }
         }
-        http.cors().configurationSource(corsConfigurationSource);
+        http.cors().configurationSource(corsConfigurationSource.getValue());
         http.csrf().disable();
         http.httpBasic().disable();
         http.addFilterBefore(password, UsernamePasswordAuthenticationFilter.class)
@@ -60,6 +63,14 @@ public class SecurityConfig {
                 .authenticationEntryPoint(entryPoint)
                 .accessDeniedHandler(accessDeniedHandler);
         return http.build();
+    }
+
+    public static void registerCorsConfiguration(String pattern) {
+        registerCorsConfiguration(pattern, corsConfiguration());
+    }
+
+    public static void registerCorsConfiguration(String pattern, CorsConfiguration corsConfiguration) {
+        corsConfigurationSource.getValue().registerCorsConfiguration(pattern, corsConfiguration);
     }
 
     private static CorsConfiguration corsConfiguration() {
