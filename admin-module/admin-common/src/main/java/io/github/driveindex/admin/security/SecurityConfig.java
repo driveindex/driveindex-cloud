@@ -12,7 +12,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.Collections;
@@ -34,17 +33,20 @@ public class SecurityConfig {
     private final IAccessDeniedHandler accessDeniedHandler;
     private final JwtTokenAuthenticationFilter jwt;
     private final PasswordOnlyAuthenticationProcessingFilter password;
+    private final UrlBasedCorsConfigurationSource corsConfigurationSource = new UrlBasedCorsConfigurationSource();
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, Environment environment) throws Exception {
+        corsConfigurationSource.registerCorsConfiguration("/download", corsConfiguration());
         if (!environment.getProperty("spring.profiles.active", "prod").equals("prod")) {
+            corsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration());
             // 测试环境允许跨域
-            http.cors().configurationSource(corsConfigurationSource());
             if (environment.getProperty("spring.h2.console.enabled", Boolean.class, false)) {
                 // 若开启 h2-console 则允许 iframe
                 http.headers().frameOptions().disable();
             }
         }
+        http.cors().configurationSource(corsConfigurationSource);
         http.csrf().disable();
         http.httpBasic().disable();
         http.addFilterBefore(password, UsernamePasswordAuthenticationFilter.class)
@@ -60,13 +62,11 @@ public class SecurityConfig {
         return http.build();
     }
 
-    private CorsConfigurationSource corsConfigurationSource() {
+    private static CorsConfiguration corsConfiguration() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.addAllowedOrigin("*");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
+        return configuration;
     }
 }

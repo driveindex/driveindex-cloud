@@ -15,12 +15,8 @@ import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
 import io.github.driveindex.common.exception.AzureDecodeException;
 import io.github.driveindex.common.util.GsonUtil;
-import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
@@ -59,7 +55,7 @@ public abstract class AzureConfigController {
                 if (expired < 10_000) refresh(accountDao);
             } catch (AzureDecodeException e) {
                 log.warn("token 刷新失败！", e);
-                return new FailedResult(-4001, "token 刷新失败：" + e.getMessage());
+                return new FailedResult(-4101, "token 刷新失败：" + e.getMessage());
             }
         }
         final DriveConfigDao driveDao;

@@ -82,7 +82,7 @@ public class FileController {
             else return SuccessResult.of(file);
         } catch (IOException | ParseException e) {
             log.warn("文件获取失败", e);
-            return new FailedResult(-4001, e.getMessage());
+            return new FailedResult(-4002, e.getMessage());
         } catch (PasswordNeededException e) {
             return PASSWORD_NEEDED;
         }
@@ -138,7 +138,7 @@ public class FileController {
             writer.write(SuccessResult.of(itemUrl).toString());
         } catch (IOException | ParseException e) {
             log.warn("文件获取失败", e);
-            writer.write(new FailedResult(-4002, e.getMessage()).toString());
+            writer.write(new FailedResult(-4003, e.getMessage()).toString());
         } catch (PasswordNeededException e) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             writer.write(PASSWORD_NEEDED.toString());
