@@ -53,18 +53,4 @@ public class DriveConfigController {
         configModule.delete(aClient, aAccount, aDrive);
         return SuccessResult.SAMPLE;
     }
-
-    @Operation(summary = "设置默认目录配置", description = "设置一个目录配置为默认")
-    @PostMapping("/api/admin/drive_config/default/{aClient}/{aAccount}/{aDrive}")
-    public ResponseData setDefault(
-            @Schema(description = "Client 配置 ID")
-            @PathVariable String aClient,
-            @Schema(description = "账号配置 ID")
-            @PathVariable String aAccount,
-            @Schema(description = "目录配置 ID")
-            @PathVariable String aDrive
-    ) {
-        boolean setDefault = configModule.setDefault(aClient, aAccount, aDrive);
-        return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
-    }
 }

@@ -80,11 +80,4 @@ public class AzureClientController {
         clientModule.delete(aClient);
         return SuccessResult.SAMPLE;
     }
-
-    @Operation(summary = "设置默认 Client 配置", description = "指定 ID 的 Client 为默认配置")
-    @PostMapping("/api/admin/azure_client/default/{aClient}")
-    public ResponseData setDefault(@PathVariable String aClient) {
-        boolean setDefault = clientModule.setDefault(aClient);
-        return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
-    }
 }

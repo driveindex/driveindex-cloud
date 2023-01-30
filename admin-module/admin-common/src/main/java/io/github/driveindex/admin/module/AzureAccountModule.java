@@ -43,11 +43,6 @@ public class AzureAccountModule {
     }
 
     @Nullable
-    public AccountTokenDao getDefault(@NonNull String aClient) {
-        return token.getDefaultByClientId(aClient).orElse(null);
-    }
-
-    @Nullable
     public AccountTokenDao getAccount(@NonNull String aClient, @NonNull String aAccount) {
         return token.getByAccount(aClient, aAccount).orElse(null);
     }
@@ -99,13 +94,5 @@ public class AzureAccountModule {
                 "id", aAccount,
                 "parent_client", aClient
         )));
-    }
-
-    public boolean setDefault(String aClient, String aAccount) {
-        AccountTokenDao account = getAccount(aClient, aAccount);
-        if (account == null) return false;
-        Value.check(System.currentTimeMillis(), (account::setDefaultTargetFlag));
-        token.updateById(account);
-        return true;
     }
 }

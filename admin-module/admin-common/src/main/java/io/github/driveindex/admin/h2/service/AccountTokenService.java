@@ -22,13 +22,6 @@ public class AccountTokenService extends ServiceImpl<AccountTokenMapper, Account
                 .list();
     }
 
-    public Optional<AccountTokenDao> getDefaultByClientId(@NonNull String aClient) {
-        return query().eq("parent_client", aClient)
-                .orderBy(true, false, "default_target_flag")
-                .last("limit 1")
-                .oneOpt();
-    }
-
     public Optional<AccountTokenDao> getByAccount(@NonNull String aClient, @NonNull String aAccount) {
         return query()
                 .allEq(Map.of(

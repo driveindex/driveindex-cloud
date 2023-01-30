@@ -144,16 +144,4 @@ public class AzureAccountController {
         accountModule.delete(aClient, aAccount);
         return SuccessResult.SAMPLE;
     }
-
-    @Operation(summary = "设置默认账号配置", description = "设置一个账号配置为默认")
-    @PostMapping("/api/admin/azure_account/default/{aClient}/{aAccount}")
-    public ResponseData setDefault(
-            @Schema(description = "Client 配置 ID")
-            @PathVariable String aClient,
-            @Schema(description = "账号配置 ID")
-            @PathVariable String aAccount
-    ) {
-        boolean setDefault = accountModule.setDefault(aClient, aAccount);
-        return setDefault ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
-    }
 }

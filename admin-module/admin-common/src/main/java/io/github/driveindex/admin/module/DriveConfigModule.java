@@ -5,6 +5,7 @@ import io.github.driveindex.admin.h2.service.AccountTokenService;
 import io.github.driveindex.admin.h2.service.DriveConfigService;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
 import io.github.driveindex.common.dto.azure.drive.DriveConfigDto;
+import io.github.driveindex.common.util.CanonicalPath;
 import io.github.driveindex.common.util.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -39,7 +40,15 @@ public class DriveConfigModule {
 
     @Nullable
     public DriveConfigDao getDefaultDriveConfig(@NonNull String aClient, @NonNull String aAccount) {
-        return config.getDefaultByAccount(aClient, aAccount).orElse(null);
+        if (!config.getByAccount(aClient, aAccount).isEmpty()) {
+            return null;
+        }
+        DriveConfigDao dao = new DriveConfigDao();
+        dao.setId(DriveConfigDao.DEFAULT_ID);
+        dao.setParentAccount(aAccount);
+        dao.setParentClient(aClient);
+        dao.setDirHome(CanonicalPath.ROOT_PATH);
+        return dao;
     }
 
     @Nullable
@@ -75,13 +84,5 @@ public class DriveConfigModule {
 
     public void delete(@NonNull String aClient, @NonNull String aAccount, @NonNull String aConfig) {
         config.remove(aClient, aAccount, aConfig);
-    }
-
-    public boolean setDefault(@NonNull String aClient, @NonNull String aAccount, @NonNull String aConfig) {
-        DriveConfigDao configDao = getDriveConfig(aClient, aAccount, aConfig);
-        if (configDao == null) return false;
-        configDao.setDefaultTargetFlag(System.currentTimeMillis());
-        config.updateById(configDao);
-        return true;
     }
 }

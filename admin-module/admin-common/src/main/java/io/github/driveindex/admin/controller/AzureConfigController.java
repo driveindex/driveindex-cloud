@@ -17,6 +17,7 @@ import io.github.driveindex.common.exception.AzureDecodeException;
 import io.github.driveindex.common.util.GsonUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 
 import java.util.Map;
 
@@ -33,20 +34,15 @@ public abstract class AzureConfigController {
     private final AzureTokenClient tokenClient;
 
     public ResponseData getConfig(String aClient, String aAccount, String aDrive) {
-        if (aClient == null || aClient.isBlank()) {
-            AzureClientDao defaultClient = clientModule.getDefault();
-            if (defaultClient == null) {
-                return FailedResult.NOT_FOUND;
-            }
-            aClient = defaultClient.getId();
+        if (StringUtils.hasText(aClient)) {
+            return FailedResult.NOT_FOUND;
         }
         final AccountTokenDao accountDao;
         synchronized (accountModule) {
-            if (aAccount == null || aAccount.isBlank()) {
-                accountDao = accountModule.getDefault(aClient);
-            } else {
-                accountDao = accountModule.getAccount(aClient, aAccount);
+            if (StringUtils.hasText(aAccount)) {
+                return FailedResult.NOT_FOUND;
             }
+            accountDao = accountModule.getAccount(aClient, aAccount);
             if (accountDao == null) {
                 return FailedResult.NOT_FOUND;
             }
@@ -59,7 +55,7 @@ public abstract class AzureConfigController {
             }
         }
         final DriveConfigDao driveDao;
-        if (aDrive != null) {
+        if (StringUtils.hasText(aDrive)) {
             driveDao = driveModule.getDriveConfig(aClient, accountDao.getId(), aDrive);
         } else {
             driveDao = driveModule.getDefaultDriveConfig(aClient, accountDao.getId());

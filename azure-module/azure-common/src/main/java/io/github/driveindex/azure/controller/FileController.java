@@ -1,11 +1,10 @@
 package io.github.driveindex.azure.controller;
 
 import io.github.driveindex.azure.exception.PasswordNeededException;
-import io.github.driveindex.azure.module.FileModule;
 import io.github.driveindex.azure.h2.dao.CacheCentralEntity;
+import io.github.driveindex.azure.module.FileModule;
 import io.github.driveindex.common.dto.azure.file.AzureContentDto;
 import io.github.driveindex.common.dto.azure.file.DirContentDto;
-import io.github.driveindex.common.dto.azure.file.FileContentDto;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
@@ -18,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -54,13 +54,13 @@ public class FileController {
     )
     @GetMapping("/api/azure/file")
     public ResponseData listFile(
-            @Schema(description = "目标 Client 配置 ID")
-            @RequestParam(required = false) String client,
-            @Schema(description = "目标微软账号 ID")
-            @RequestParam(required = false) String account,
+            @Schema(description = "目标 Client 配置 ID", required = true)
+            @RequestParam String client,
+            @Schema(description = "目标微软账号 ID", required = true)
+            @RequestParam String account,
             @Schema(description = "目标目录配置 ID")
             @RequestParam(required = false) String drive,
-            @Schema(description = "目录")
+            @Schema(description = "目录", required = true)
             @RequestParam String path,
             @Schema(description = "若目标目录需要密码，则附带此参数，明文传输即可")
             @RequestParam(required = false) String password,
@@ -73,6 +73,10 @@ public class FileController {
             @Schema(description = "页索引", defaultValue = "0")
             @RequestParam(name = "page_index", required = false) Long pageIndex
     ) {
+        if (!StringUtils.hasText(client) || !StringUtils.hasText(account)
+                || !StringUtils.hasText(password)) {
+            return FailedResult.NOT_FOUND;
+        }
         try {
             AzureContentDto<?> file = fileModule.getFile(
                     client, account, drive, path, password,

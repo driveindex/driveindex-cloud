@@ -4,7 +4,6 @@ import io.github.driveindex.admin.h2.dao.AzureClientDao;
 import io.github.driveindex.admin.h2.service.AzureClientService;
 import io.github.driveindex.common.dto.azure.drive.AzureClientDetailDto;
 import io.github.driveindex.common.dto.azure.drive.AzureClientDto;
-import io.github.driveindex.common.util.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
@@ -38,11 +37,6 @@ public class AzureClientModule {
     }
 
     @Nullable
-    public AzureClientDao getDefault() {
-        return client.getDefault().orElse(null);
-    }
-
-    @Nullable
     public AzureClientDao getById(@NonNull String id) {
         return client.getById(id);
     }
@@ -69,13 +63,5 @@ public class AzureClientModule {
 
     public void delete(String id) {
         client.removeById(id);
-    }
-
-    public boolean setDefault(@NonNull String aClient) {
-        AzureClientDao clientDao = getById(aClient);
-        if (clientDao == null) return false;
-        Value.check(System.currentTimeMillis(), (clientDao::setDefaultTargetFlag));
-        client.updateById(clientDao);
-        return true;
     }
 }

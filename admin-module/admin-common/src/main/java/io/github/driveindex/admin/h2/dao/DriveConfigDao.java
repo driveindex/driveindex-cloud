@@ -5,8 +5,6 @@ import io.github.driveindex.common.dto.azure.drive.DriveConfigDetailDto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-import java.util.Date;
-
 /**
  * @author sgpublic
  * @Date 2022/8/7 18:02
@@ -15,10 +13,10 @@ import java.util.Date;
 @EqualsAndHashCode(callSuper = true)
 @TableName("drive_config")
 public class DriveConfigDao extends DriveConfigDetailDto {
+    public static final String DEFAULT_ID = "default";
+
     private String id;
 
     private String parentClient;
     private String parentAccount;
-
-    private Long defaultTargetFlag = -(new Date().getTime());
 }

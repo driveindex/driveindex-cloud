@@ -7,7 +7,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 /**
  * @author sgpublic
@@ -17,12 +16,6 @@ import java.util.Optional;
 public class AzureClientService extends ServiceImpl<AzureClientMapper, AzureClientDao> {
     public List<AzureClientDao> getAll() {
         return list();
-    }
-
-    public Optional<AzureClientDao> getDefault() {
-        return query().orderBy(true, false, "default_target_flag")
-                .last("limit 1")
-                .oneOpt();
     }
 
     public boolean clientExists(@NonNull String aClient) {

@@ -66,7 +66,7 @@ public class FileModule {
 
     @Nullable
     public AzureContentDto<?> getFile(
-            @Nullable String client, @Nullable String account,
+            @NonNull String client, @NonNull String account,
             @Nullable String drive, @NonNull String path,
             @Nullable String password,
             final @Nullable CacheCentralEntity.Sort sortBy,
