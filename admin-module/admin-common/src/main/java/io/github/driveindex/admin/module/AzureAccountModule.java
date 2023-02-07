@@ -1,12 +1,12 @@
 package io.github.driveindex.admin.module;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import io.github.driveindex.admin.h2.dao.AccountTokenDao;
+import io.github.driveindex.admin.h2.dao.AccountTokenDto;
 import io.github.driveindex.admin.h2.service.AccountTokenService;
 import io.github.driveindex.admin.h2.service.AzureClientService;
 import io.github.driveindex.common.dto.azure.drive.AccountDetailDto;
 import io.github.driveindex.common.dto.azure.drive.AccountDto;
-import io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto;
+import io.github.driveindex.common.dto.azure.drive.AzureDriveListDto;
 import io.github.driveindex.common.util.Value;
 import lombok.RequiredArgsConstructor;
 import org.springframework.lang.NonNull;
@@ -28,31 +28,36 @@ public class AzureAccountModule {
     private final AccountTokenService token;
     private final DriveConfigModule drive;
 
-    public LinkedList<AccountDto> getAll(@NonNull String aClient) {
+    public AzureDriveListDto getAll() {
+        AzureDriveListDto result = new AzureDriveListDto();
+        result.addAll(token.getAll());
+        return result;
+    }
+
+    public LinkedList<AccountDto> getAllByClient(@NonNull String aClient) {
         LinkedList<AccountDto> result = new LinkedList<>();
-        List<AccountTokenDao> accounts = token.getByClientId(aClient);
-        for (AccountTokenDao account : accounts) {
+        List<AccountTokenDto> accounts = token.getByClientId(aClient);
+        for (AccountTokenDto account : accounts) {
             AccountDto tmp = new AccountDto();
             tmp.setId(account.getId());
             tmp.setDetail(account.clone());
             tmp.setChild(drive.getAll(aClient, account.getId()));
             result.add(tmp);
         }
-        if (!result.isEmpty()) result.getFirst().setIsDefault(true);
         return result;
     }
 
     @Nullable
-    public AccountTokenDao getAccount(@NonNull String aClient, @NonNull String aAccount) {
+    public AccountTokenDto getAccount(@NonNull String aClient, @NonNull String aAccount) {
         return token.getByAccount(aClient, aAccount).orElse(null);
     }
 
     public boolean save(@NonNull String aClient, @NonNull String aAccount, @NonNull AccountDetailDto dto) {
-        AccountTokenDao account = getAccount(aClient, aAccount);
+        AccountTokenDto account = getAccount(aClient, aAccount);
         if (account == null) {
             boolean clientExist = client.getById(aClient) != null;
             if (!clientExist) return false;
-            account = new AccountTokenDao();
+            account = new AccountTokenDto();
             Value.check(aAccount, (account::setId));
             Value.check(aClient, (account::setParentClient));
         }
@@ -62,8 +67,8 @@ public class AzureAccountModule {
         return true;
     }
 
-    public boolean saveToken(@NonNull String aClient, @NonNull String aAccount, @NonNull AccountTokenDto.Response tokenDto) {
-        AccountTokenDao account = getAccount(aClient, aAccount);
+    public boolean saveToken(@NonNull String aClient, @NonNull String aAccount, @NonNull io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto.Response tokenDto) {
+        AccountTokenDto account = getAccount(aClient, aAccount);
         if (account == null) return false;
 
         Value.check(tokenDto.getTokenType(), (account::setTokenType));
@@ -76,13 +81,13 @@ public class AzureAccountModule {
         return true;
     }
 
-    public void save(@NonNull AccountTokenDao dao) {
+    public void save(@NonNull AccountTokenDto dao) {
         if (getAccount(dao.getParentClient(), dao.getId()) == null) return;
         token.saveOrUpdate(dao);
     }
 
     public boolean enable(@NonNull String aClient, @NonNull String aAccount, Boolean enabled) {
-        AccountTokenDao account = getAccount(aClient, aAccount);
+        AccountTokenDto account = getAccount(aClient, aAccount);
         if (account == null) return false;
         Value.check(enabled, (account::setEnable));
         token.updateById(account);
@@ -90,7 +95,7 @@ public class AzureAccountModule {
     }
 
     public void delete(String aClient, String aAccount) {
-        token.remove(new QueryWrapper<AccountTokenDao>().allEq(Map.of(
+        token.remove(new QueryWrapper<AccountTokenDto>().allEq(Map.of(
                 "id", aAccount,
                 "parent_client", aClient
         )));

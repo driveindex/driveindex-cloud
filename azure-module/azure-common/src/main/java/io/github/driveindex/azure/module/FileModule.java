@@ -5,15 +5,14 @@ import io.github.driveindex.azure.core.SpecialFile;
 import io.github.driveindex.azure.exception.PasswordNeededException;
 import io.github.driveindex.azure.exception.PasswordTooLongException;
 import io.github.driveindex.azure.feign.AzureClient;
-import io.github.driveindex.azure.feign.ConfigClient;
-import io.github.driveindex.azure.h2.dao.CacheCentralEntity;
+import io.github.driveindex.azure.h2.dao.AzureFileEntity;
 import io.github.driveindex.azure.h2.dao.ContentCacheEntity;
 import io.github.driveindex.azure.h2.dao.DirCacheEntity;
 import io.github.driveindex.azure.h2.dao.FileCacheEntity;
-import io.github.driveindex.azure.h2.service.AzureCacheCentralService;
 import io.github.driveindex.azure.h2.service.AzureContentCacheService;
 import io.github.driveindex.azure.h2.service.AzureDirCacheService;
 import io.github.driveindex.azure.h2.service.AzureFileCacheService;
+import io.github.driveindex.azure.h2.service.AzureFileService;
 import io.github.driveindex.azure.util.PageUtil;
 import io.github.driveindex.azure.util.Sha1Util;
 import io.github.driveindex.common.dto.azure.drive.AzureDriveDto;
@@ -32,7 +31,6 @@ import org.springframework.web.client.RestTemplate;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,36 +42,23 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Component
 public class FileModule {
-    private final ConfigClient configClient;
+    private final DriveConfigModule configModule;
     private final AzureClient azureClient;
-    private final AzureCacheCentralService cacheCentralService;
+    private final AzureFileService cacheCentralService;
     private final AzureFileCacheService fileCacheService;
     private final AzureDirCacheService dirCacheService;
     private final AzureContentCacheService contentCacheService;
-
-    private AzureDriveDto getConfig(
-            @Nullable String client,
-            @Nullable String account,
-            @Nullable String drive
-    ) {
-        Map<String, Object> config = configClient.getConfig(client, account, drive);
-        Double code = (Double) config.get("code");
-        if (code != 200) return null;
-        //noinspection unchecked
-        Map<String, Object> token = (Map<String, Object>) config.get("data");
-        return GsonUtil.fromJson(GsonUtil.fromMap(token), AzureDriveDto.class);
-    }
 
     @Nullable
     public AzureContentDto<?> getFile(
             @NonNull String client, @NonNull String account,
             @Nullable String drive, @NonNull String path,
             @Nullable String password,
-            final @Nullable CacheCentralEntity.Sort sortBy,
+            final @Nullable AzureFileEntity.Sort sortBy,
             final @Nullable Boolean asc,
             @Nullable Long pageSize, @Nullable Long pageIndex
     ) throws AzureDecodeException, PasswordNeededException, IOException, ParseException {
-        AzureDriveDto config = getConfig(client, account, drive);
+        AzureDriveDto config = configModule.getConfig(client, account, drive);
         if (config == null) return null;
         if (path.endsWith(SpecialFile._PASSWORD.toString()))
             throw new FileNotFoundException("密码文件不允许下载！");
@@ -83,7 +68,7 @@ public class FileModule {
                 config.getToken().toString(), password
         );
 
-        final CacheCentralEntity item = getItem(fillPath, config.getToken().toString());
+        final AzureFileEntity item = getItem(fillPath, config.getToken().toString());
         if (item == null) throw new FileNotFoundException("文件不存在：\"" + fillPath.getPath() + "\"");
         AzureContentDto<?> dto;
         if (!item.getIsDir()) {
@@ -95,16 +80,16 @@ public class FileModule {
             file.setContent(itemDto);
             dto = file;
         } else {
-            Page<CacheCentralEntity> list = getList(
+            Page<AzureFileEntity> list = getList(
                     fillPath, config.getToken().toString(),
                     PageUtil.createPage(pageSize, pageIndex),
-                    sortBy != null ? sortBy : CacheCentralEntity.Sort.NAME,
+                    sortBy != null ? sortBy : AzureFileEntity.Sort.NAME,
                     asc == null || asc
             );
             if (list == null) throw new FileNotFoundException("文件不存在");
 
             DirContentDto.FileList detail = new DirContentDto.FileList();
-            for (CacheCentralEntity index : list.getRecords()) {
+            for (AzureFileEntity index : list.getRecords()) {
                 // 从目录中排除 .password 文件
                 if (SpecialFile._PASSWORD.match(index.getName())) continue;
                 FileItemDto itemDto = new FileItemDto();
@@ -134,50 +119,36 @@ public class FileModule {
             @Nullable String drive, @NonNull String path,
             @Nullable String password
     ) throws IOException, ParseException {
-        AzureDriveDto config = getConfig(client, account, drive);
+        AzureDriveDto config = configModule.getConfig(client, account, drive);
         if (config == null) return null;
         CanonicalPath fillPath = checkPassword(
                 CanonicalPath.of(config.getDirHome()), CanonicalPath.of(path),
                 config.getToken().toString(), password
         );
-        CacheCentralEntity item = getItem(fillPath, config.getToken().toString());
+        AzureFileEntity item = getItem(fillPath, config.getToken().toString());
         if (item == null || item.getIsDir()) return null;
         return fileCacheService.getDownloadUrlById(item.getId());
     }
 
     @Nullable
-    public CacheCentralEntity getItem(CanonicalPath fillPath, String token)
+    public AzureFileEntity getItem(@NonNull CanonicalPath fillPath, @NonNull String token)
             throws PasswordNeededException {
-        CacheCentralEntity cache = cacheCentralService.getByPath(fillPath.getPath());
-        if (cache != null) return cache;
-        CanonicalPath parentPath = fillPath.getParentPath();
-        if (parentPath == null) refreshRoot(token);
-        refreshList((parentPath == null) ? fillPath : parentPath, token);
-        return cacheCentralService.getByPath(fillPath.getPath());
+        return cacheCentralService.getByPath(fillPath);
     }
 
-    private void refreshRoot(String token) {
-        Map<String, Object> root = azureClient.getRoot(token);
-        parseRoot(root);
-    }
-
-    private Page<CacheCentralEntity> getList(
+    private Page<AzureFileEntity> getList(
             CanonicalPath fillPath, String token,
-            Page<CacheCentralEntity> page,
-            @NonNull CacheCentralEntity.Sort sort,
+            Page<AzureFileEntity> page,
+            @NonNull AzureFileEntity.Sort sort,
             @NonNull Boolean asc
     ) throws PasswordNeededException, FileNotFoundException {
-        CacheCentralEntity currentPath = getItem(fillPath, token);
+        AzureFileEntity currentPath = getItem(fillPath, token);
         if (currentPath == null) return null;
-        DirDetailDto dirCache = dirCacheService.getById(currentPath.getId());
         if (!currentPath.getIsDir()) throw new FileNotFoundException("不是一个文件夹");
-        Page<CacheCentralEntity> record = cacheCentralService
-                .pageByParentId(currentPath.getId(), page, sort, asc);
-        if (record.getTotal() == dirCache.getChildCount()) return record;
-        refreshList(fillPath, token);
         return cacheCentralService.pageByParentId(currentPath.getId(), page, sort, asc);
     }
 
+    @Deprecated
     private void refreshList(CanonicalPath fillPath, String token)
             throws PasswordNeededException {
         Map<String, Object> json = azureClient.listFile(
@@ -190,17 +161,14 @@ public class FileModule {
         }
     }
 
-    private void parseRoot(Map<String, Object> index) {
-        parseItem(index, null);
-    }
-
+    @Deprecated
     private void parseItem(
             Map<String, Object> index,
             @Nullable CanonicalPath fillPath
     ) {
         if (!index.containsKey("folder") && !index.containsKey("file")) return;
         log.trace(GsonUtil.fromMap(index));
-        CacheCentralEntity item = new CacheCentralEntity();
+        AzureFileEntity item = new AzureFileEntity();
         item.setName((String) index.get("name"));
         item.setId((String) index.get("id"));
         item.setSize(((Double) index.get("size")).longValue());
@@ -208,7 +176,7 @@ public class FileModule {
         item.setCanonicalPath((fillPath == null)
                 ? CanonicalPath.ROOT_PATH
                 : fillPath.append(item.getName()).getPath());
-        item.setCanonicalPathHash(item.getCanonicalPath());
+        item.setCanonicalPathHash(item.getCanonicalPathHash());
         //noinspection unchecked
         Map<String, Object> parentReference = (Map<String, Object>) index.get("parentReference");
         item.setParentId((String) parentReference.get("id"));
@@ -219,7 +187,7 @@ public class FileModule {
         if (index.containsKey("folder")) {
             //noinspection unchecked
             Map<String, Object> folder = (Map<String, Object>) index.get("folder");
-            item.setMineType(CacheCentralEntity.MEDIA_TYPE_DIR);
+            item.setMineType(AzureFileEntity.MEDIA_TYPE_DIR);
             item.setIsDir(true);
             DirCacheEntity entity = new DirCacheEntity();
             entity.setId(item.getId());
@@ -245,7 +213,8 @@ public class FileModule {
     }
 
     private CanonicalPath checkPassword(
-            CanonicalPath dirHome, CanonicalPath currentPath,
+            @NonNull CanonicalPath dirHome,
+            @NonNull CanonicalPath currentPath,
             String token, String password
     ) throws IOException {
         String passSet = Sha1Util.convert(
@@ -260,26 +229,24 @@ public class FileModule {
     }
 
     private final RestTemplate rest;
-    private String findPassword(CanonicalPath dirHome, CanonicalPath currentPath, String token)
-            throws AzureDecodeException, IOException {
-        if (currentPath == null) return null;
+    private String findPassword(
+            @NonNull CanonicalPath dirHome,
+            @NonNull CanonicalPath currentPath,
+            String token
+    ) throws AzureDecodeException, IOException {
         CanonicalPath _password = currentPath.append(SpecialFile._PASSWORD.toString());
-        try {
-            CacheCentralEntity item = getItem(dirHome.append(_password), token);
+        AzureFileEntity item = getItem(dirHome.append(_password), token);
 
-            if (item == null || item.getIsDir())
-                return findPassword(dirHome, currentPath.getParentPath(), token);
-
-            String downloadUrl = fileCacheService.getDownloadUrlById(item.getId());
-            Resource resp = rest.getForEntity(downloadUrl, Resource.class).getBody();
-            if (resp == null) {
-                throw new IOException("failed to read body of \".password\".");
-            }
-            return getItemContent(item.getId(), item.getName(), PasswordTooLongException.PASSWORD_LENGTH);
-        } catch (AzureDecodeException e) {
-            if (!AzureDecodeException.CODE_ITEM_NOT_FOUND.equals(e.getCode())) throw e;
+        if (item == null || item.getIsDir() && currentPath.hasParent()) {
+            return findPassword(dirHome, currentPath.getParentPath(), token);
         }
-        return findPassword(dirHome, currentPath.getParentPath(), token);
+
+        String downloadUrl = fileCacheService.getDownloadUrlById(item.getId());
+        Resource resp = rest.getForEntity(downloadUrl, Resource.class).getBody();
+        if (resp == null) {
+            throw new IOException("failed to read body of \".password\".");
+        }
+        return getItemContent(item.getId(), item.getName(), PasswordTooLongException.PASSWORD_LENGTH);
     }
 
     private String getItemContent(String id, String name, Integer lengthLimit) throws IOException {

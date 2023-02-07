@@ -34,7 +34,7 @@ public class IAuthenticationSuccessHandler implements AuthenticationSuccessHandl
         response.setCharacterEncoding(StandardCharsets.UTF_8.name());
         PrintWriter writer = response.getWriter();
         try {
-            String jwt = JwtUtil.createToken(ConfigManager.getAdminPassword());
+            String jwt = JwtUtil.createToken(ConfigManager.Password.getValue());
             AccessTokenDto dto = new AccessTokenDto();
             dto.setToken(jwt);
             writer.write(SuccessResult.of(dto).toString());

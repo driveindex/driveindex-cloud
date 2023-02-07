@@ -11,9 +11,11 @@
 		<module>admin-module</module>
 
 		<module>boot</module>
-		<!--		<module>logging-service</module>-->
+<!--		<module>logging-service</module>-->
 	</modules>
 	<properties>
+		<driveindex.version>1.0.0-alpha04</driveindex.version>
+
 		<maven.compiler.source>17</maven.compiler.source>
 		<maven.compiler.target>17</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -37,7 +39,7 @@
 	</parent>
 	<groupId>io.github.driveindex</groupId>
 	<artifactId>driveindex</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>${driveindex.version}</version>
 	<name>DriveIndex</name>
 	<description>DriveIndex 的 SpringCloud 实现</description>
 

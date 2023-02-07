@@ -19,8 +19,8 @@ import java.util.List;
  * @author sgpublic
  * @Date 2022/8/9 12:12
  */
+@Component("adminDriveConfigModule")
 @RequiredArgsConstructor
-@Component
 public class DriveConfigModule {
     private final AccountTokenService token;
     private final DriveConfigService config;

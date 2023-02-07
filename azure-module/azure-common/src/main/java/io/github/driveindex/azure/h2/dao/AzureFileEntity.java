@@ -2,7 +2,7 @@ package io.github.driveindex.azure.h2.dao;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.github.driveindex.common.dto.azure.file.AzureItemDto;
-import io.github.driveindex.common.manager.ConfigManager;
+import io.github.driveindex.common.util.CanonicalPath;
 import lombok.Data;
 
 /**
@@ -10,8 +10,8 @@ import lombok.Data;
  * @Date 2022/8/15 18:35
  */
 @Data
-@TableName("cache_central")
-public class CacheCentralEntity extends AzureItemDto {
+@TableName("azure_file")
+public class AzureFileEntity extends AzureItemDto {
     private String id;
     private String name;
     private String canonicalPath;
@@ -19,14 +19,17 @@ public class CacheCentralEntity extends AzureItemDto {
     private String mineType;
     private Boolean isDir;
     private String parentId;
-    private Long expiresTime = System.currentTimeMillis() + ConfigManager.getCacheExpiresIn() * 1000;
 
     public void setCanonicalPathHash(Integer hash) {
         canonicalPathHash = hash;
     }
 
-    public void setCanonicalPathHash(String canonicalPath) {
-        canonicalPathHash = canonicalPath.toLowerCase().hashCode();
+    public void setCanonicalPathHash(CanonicalPath canonicalPath) {
+        canonicalPathHash = canonicalPath.hashCode();
+    }
+
+    public int getCanonicalPathHash() {
+        return CanonicalPath.of(getCanonicalPath()).hashCode();
     }
 
     public static final String MEDIA_TYPE_DIR = "directory";
@@ -39,7 +42,7 @@ public class CacheCentralEntity extends AzureItemDto {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof CacheCentralEntity other)) return false;
+        if (!(o instanceof AzureFileEntity other)) return false;
         if (other.getId() != null) return other.getId().equals(this.getId());
         return this.getId() == null;
     }

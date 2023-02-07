@@ -2,13 +2,12 @@ package io.github.driveindex.admin.controller;
 
 import feign.codec.DecodeException;
 import io.github.driveindex.admin.feign.AzureTokenClient;
-import io.github.driveindex.admin.h2.dao.AccountTokenDao;
+import io.github.driveindex.admin.h2.dao.AccountTokenDto;
 import io.github.driveindex.admin.h2.dao.AzureClientDao;
 import io.github.driveindex.admin.module.AzureAccountModule;
 import io.github.driveindex.admin.module.AzureClientModule;
 import io.github.driveindex.common.dto.azure.drive.AccountDetailDto;
 import io.github.driveindex.common.dto.azure.drive.DeviceCodeCheckDto;
-import io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto;
 import io.github.driveindex.common.dto.azure.microsoft.DeviceCodeDto;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.dto.result.ResponseData;
@@ -75,7 +74,7 @@ public class AzureAccountController {
             @Schema(description = "账号配置 ID")
             @PathVariable String aAccount
     ) {
-        AccountTokenDao account = accountModule.getAccount(aClient, aAccount);
+        AccountTokenDto account = accountModule.getAccount(aClient, aAccount);
         if (account == null) return FailedResult.NOT_FOUND;
         AzureClientDao parentClient = clientModule.getById(aClient);
         if (parentClient == null) return FailedResult.NOT_FOUND;
@@ -109,7 +108,7 @@ public class AzureAccountController {
             @PathVariable String aAccount,
             @RequestBody DeviceCodeCheckDto dto
     ) {
-        AccountTokenDao account = accountModule.getAccount(aClient, aAccount);
+        AccountTokenDto account = accountModule.getAccount(aClient, aAccount);
         if (account == null) return FailedResult.NOT_FOUND;
         AzureClientDao parentClient = clientModule.getById(account.getParentClient());
         if (parentClient == null) return FailedResult.NOT_FOUND;
@@ -124,7 +123,7 @@ public class AzureAccountController {
             Map<String, Object> code = feign.getToken(check);
             String json = GsonUtil.fromMap(code);
             boolean saved = accountModule.saveToken(aClient, aAccount,
-                    GsonUtil.fromJson(json, AccountTokenDto.Response.class));
+                    GsonUtil.fromJson(json, io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto.Response.class));
             return saved ? SuccessResult.SAMPLE : FailedResult.NOT_FOUND;
         } catch (AzureDecodeException e) {
             if ("authorization_pending".equals(e.getCode())) return LOGIN_PENDING;

@@ -1,7 +1,7 @@
 package io.github.driveindex.azure.controller;
 
 import io.github.driveindex.azure.exception.PasswordNeededException;
-import io.github.driveindex.azure.h2.dao.CacheCentralEntity;
+import io.github.driveindex.azure.h2.dao.AzureFileEntity;
 import io.github.driveindex.azure.module.FileModule;
 import io.github.driveindex.common.dto.azure.file.AzureContentDto;
 import io.github.driveindex.common.dto.azure.file.DirContentDto;
@@ -65,7 +65,7 @@ public class FileController {
             @Schema(description = "若目标目录需要密码，则附带此参数，明文传输即可")
             @RequestParam(required = false) String password,
             @Schema(description = "排序规则", allowableValues = { "name", "size", "create_time", "modified_time" }, defaultValue = "name")
-            @RequestParam(name = "sort_by", required = false) CacheCentralEntity.Sort sortBy,
+            @RequestParam(name = "sort_by", required = false) AzureFileEntity.Sort sortBy,
             @Schema(description = "是否升序", defaultValue = "true")
             @RequestParam(name = "asc", required = false) Boolean asc,
             @Schema(description = "分页大小", defaultValue = "15")

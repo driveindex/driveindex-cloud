@@ -1,5 +1,6 @@
 package io.github.driveindex.common.util;
 
+import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 
 import java.io.Serializable;
@@ -63,15 +64,23 @@ public class CanonicalPath implements Cloneable, Serializable {
     }
 
     /**
-     * 获取父级文件对象，可能为空
-     * @return 父级文件对象，若当前目录已经为根目录，则返回 null
+     * 获取父级文件对象
+     * @return 父级文件对象，若当前目录已经为根目录，则返回 ROOT_PATH
      */
-    @Nullable
+    @NonNull
     public CanonicalPath getParentPath() {
         Stack<String> path = clonePath();
-        if (path.isEmpty()) return null;
+        if (path.isEmpty()) return CanonicalPath.of(ROOT_PATH);
         else path.pop();
         return new CanonicalPath(path);
+    }
+
+    /**
+     * 是否存在父级目录
+     * @return 是否存在父级目录
+     */
+    public boolean hasParent() {
+        return !path.isEmpty();
     }
 
     /**

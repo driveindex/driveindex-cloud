@@ -5,7 +5,8 @@
     <parent>
         <artifactId>driveindex</artifactId>
         <groupId>io.github.driveindex</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0-alpha04</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -54,5 +55,17 @@
             <artifactId>springdoc-openapi-security</artifactId>
             <version>${springdoc.ver}</version>
         </dependency>
+
+        <!--Microsoft Azure SDK，弃用，不支持自定义 token 管理-->
+<!--        <dependency>-->
+<!--            <groupId>com.microsoft.graph</groupId>-->
+<!--            <artifactId>microsoft-graph</artifactId>-->
+<!--            <version>5.45.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.azure</groupId>-->
+<!--            <artifactId>azure-identity</artifactId>-->
+<!--            <version>1.7.3</version>-->
+<!--        </dependency>-->
     </dependencies>
 </project>

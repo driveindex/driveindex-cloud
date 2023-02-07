@@ -13,12 +13,17 @@ import java.util.Map;
 public interface AzureClient {
     String BASE_URL = "https://graph.microsoft.com";
 
+    @Deprecated
     @GetMapping("/v1.0/me/drive/root{path}/children")
     Map<String, Object> listFile(
             @PathVariable String path,
             @RequestHeader("Authorization") String token
     );
 
+    @Deprecated
     @GetMapping("/v1.0/me/drive/root")
     Map<String, Object> getRoot(@RequestHeader("Authorization") String token);
+
+    @GetMapping("/v1.0/me/drive/root/delta")
+    Map<String, Object> delta(@RequestHeader("Authorization") String token);
 }

@@ -11,7 +11,6 @@ import org.springframework.web.client.RestTemplate;
  */
 @Configuration
 public class CacheCleanerConfig {
-    @Bean("cacheCleanerScheduler")
     protected ThreadPoolTaskScheduler createScheduler() {
         ThreadPoolTaskScheduler taskScheduler = new ThreadPoolTaskScheduler();
         taskScheduler.setThreadNamePrefix("cache-cleaner-");

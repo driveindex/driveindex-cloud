@@ -11,6 +11,6 @@ import java.io.Serializable;
  */
 @Data
 public class AccessTokenDto implements Serializable {
-    @Schema(description = "用户登陆凭证，使用请附加到 header 中，key 为 driveindex-authentication", example = "a5c2bca1aaz3...")
+    @Schema(description = "用户登陆凭证，使用请附加到 header 中，key 为 Authentication", example = "a5c2bca1aaz3...")
     private String token;
 }

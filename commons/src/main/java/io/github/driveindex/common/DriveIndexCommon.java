@@ -1,6 +1,5 @@
 package io.github.driveindex.common;
 
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import org.springframework.boot.SpringApplication;
 
 import java.util.ArrayList;
@@ -20,10 +19,11 @@ public class DriveIndexCommon {
     }
 
     public static final String APPLICATION_BASE_NAME = "DriveIndex";
+    public static final String APPLICATION_BASE_NAME_LOWER = APPLICATION_BASE_NAME.toLowerCase();
     public static final String APPLICATION_PACKAGE = "io.github.driveindex";
 
     public static final String JWT_TAG = "tag";
-    public static final String TOKEN_KEY = "DriveIndex-Authentication";
+    public static final String TOKEN_KEY = "Authentication";
     public static final String SECURITY_HEADER = "DriveIndex-TAG";
 
     public static Bootstrap Bootstrap(Class<?> clazz) {
@@ -64,7 +64,7 @@ public class DriveIndexCommon {
         }
 
         public Bootstrap setDatasource(String name) {
-            properties.put("spring.datasource.username", APPLICATION_BASE_NAME.toLowerCase());
+            properties.put("spring.datasource.username", APPLICATION_BASE_NAME_LOWER);
             properties.put("spring.datasource.url", "jdbc:h2:file:./data/" + name);
             properties.put("spring.datasource.driver-class-name", "org.h2.Driver");
             return this;

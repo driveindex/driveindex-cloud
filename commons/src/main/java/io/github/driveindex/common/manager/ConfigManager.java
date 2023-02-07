@@ -1,15 +1,18 @@
 package io.github.driveindex.common.manager;
 
 import io.github.driveindex.common.DriveIndexCommon;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.ini4j.Profile;
 import org.ini4j.Wini;
+import org.ini4j.spi.BeanTool;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -22,6 +25,34 @@ import java.util.Base64;
 @Slf4j
 @Component
 public class ConfigManager {
+    private static final String SectionAdmin = "admin";
+    public static IniVar<String> Password = new IniVar<>(
+            SectionAdmin, "password", DriveIndexCommon.APPLICATION_BASE_NAME_LOWER
+    );
+
+    private static final String SectionJwt = "jwt";
+    public static IniVal<String> TokenSecurityKey = new IniVar<>(
+            SectionJwt, "security", DriveIndexCommon.APPLICATION_BASE_NAME_LOWER
+    );
+    public static byte[] getTokenSecurityKey() {
+        byte[] base = TokenSecurityKey.getValue().getBytes(StandardCharsets.UTF_8);
+        if (base.length < 128) {
+            byte[] clone = base.clone();
+            base = new byte[128];
+            for (int i = 0; i < 128; i++) {
+                base[i] = clone[i % clone.length];
+            }
+        }
+        return Base64.getEncoder().encode(base);
+    }
+    public static IniVal<Long> TokenExpired = new IniVar<>(
+            SectionJwt, "security", 3600_000L
+    );
+
+    private static final String SectionCache = "cache";
+    public static IniVar<Integer> DeltaTrackingTick = new IniVar<>(SectionCache, "expires_in", 60);
+
+
     private static final String CONFIG_NAME = "driveindex.ini";
     private static File config = new File("./conf", CONFIG_NAME);
 
@@ -51,97 +82,53 @@ public class ConfigManager {
     private static final Wini ini = new Wini();
     static { ini.setFile(config); }
 
-    private static Profile.Section getSection(String sectionName) throws IOException {
-        ini.load();
-        Profile.Section section = ini.get(sectionName);
-        if (section == null) {
-            ini.add(sectionName);
+    public static class IniVar<TypeT> extends IniVal<TypeT> {
+        public IniVar(String section, String key, TypeT defVal) {
+            super(section, key, defVal);
+        }
+
+        public void setValue(@NonNull TypeT value) throws IOException {
+            Profile.Section section1 = getSection(section);
+            section1.put(key, toIni(value));
+            ini.put(section, section1);
             ini.store();
         }
-        return ini.get(sectionName);
-    }
 
-    private static final String SECTION_ADMIN = "admin";
-
-    private static final String KEY_PASSWORD = "password";
-    public static final String DEFAULT_PASSWORD = "driveindex";
-    public static String getAdminPassword() {
-        try {
-            return getSection(SECTION_ADMIN)
-                    .getOrDefault(KEY_PASSWORD, DEFAULT_PASSWORD);
-        } catch (Exception e) {
-            if (!(e instanceof FileNotFoundException))
-                log.warn("后台管理员密码配置信息获取失败，使用默认值", e);
-            return DEFAULT_PASSWORD;
+        public String toIni(TypeT value) {
+            return value.toString();
         }
     }
-    public static void setAdminPassword(String password) throws IOException {
-        Profile.Section section = getSection(SECTION_ADMIN);
-        section.put(KEY_PASSWORD, password);
-        ini.put(SECTION_ADMIN, section);
-        ini.store();
-    }
 
-    private static final String SECTION_JWT = "jwt";
+    @RequiredArgsConstructor
+    public static class IniVal<TypeT> {
+        protected final String section;
+        protected final String key;
+        @Getter
+        private final TypeT DefaultValue;
 
-    private static final String KEY_JET_SECURITY = "security";
-    public static byte[] getTokenSecurityKey() {
-        byte[] base;
-        try {
-            base = getSection(SECTION_JWT)
-                    .getOrDefault(KEY_JET_SECURITY, DriveIndexCommon.APPLICATION_BASE_NAME)
-                    .getBytes(StandardCharsets.UTF_8);
-        } catch (Exception e) {
-            if (!(e instanceof FileNotFoundException))
-                log.warn("token 加密密钥配置信息获取失败，使用默认值", e);
-            base = DriveIndexCommon.APPLICATION_BASE_NAME.getBytes(StandardCharsets.UTF_8);
-        }
-        if (base.length < 128) {
-            byte[] clone = base.clone();
-            base = new byte[128];
-            for (int i = 0; i < 128; i++) {
-                base[i] = clone[i % clone.length];
+        @NonNull
+        public TypeT getValue() {
+            try {
+                return fromIni(getSection(section).get(key));
+            } catch (Exception e) {
+                return DefaultValue;
             }
         }
-        return Base64.getEncoder().encode(base);
-    }
 
-    private static final String KEY_JWT_EXPIRED = "expired";
-    private static final long DEFAULT_JWT_EXPIRED = 3600_000;
-    public static long getTokenExpired() {
-        try {
-            return getSection(SECTION_JWT)
-                    .get(KEY_JWT_EXPIRED, Long.class, DEFAULT_JWT_EXPIRED);
-        } catch (Exception e) {
-            if (!(e instanceof FileNotFoundException))
-                log.warn("token 时效配置信息获取失败，使用默认值", e);
-            return DEFAULT_JWT_EXPIRED;
+        protected TypeT fromIni(String origin) {
+            //noinspection unchecked
+            TypeT parse = (TypeT) BeanTool.getInstance().parse(origin, DefaultValue.getClass());
+            return parse != null ? parse : DefaultValue;
         }
-    }
 
-    private static final String SECTION_CACHE = "cache";
-
-    private static final String KEY_CACHE_EXPIRES_IN = "expires_in";
-    private static final Integer DEFAULT_CACHE_EXPIRES_IN = 600;
-    public static Integer getCacheExpiresIn() {
-        try {
-            return getSection(SECTION_CACHE)
-                    .get(KEY_CACHE_EXPIRES_IN, Integer.class, DEFAULT_CACHE_EXPIRES_IN);
-        } catch (IOException e) {
-            log.warn("缓存时效信息获取失败，使用默认值", e);
-            return DEFAULT_CACHE_EXPIRES_IN;
-        }
-    }
-
-    private static final String KEY_CACHE_CLEAN_TICK_TIME = "expired";
-    private static final Integer DEFAULT_CACHE_CLEAN_TICK_TIME = 60;
-    public static Integer getCacheCleanTickTime() {
-        try {
-            return getSection(SECTION_CACHE)
-                    .get(KEY_CACHE_CLEAN_TICK_TIME, Integer.class, DEFAULT_CACHE_CLEAN_TICK_TIME);
-        } catch (IOException e) {
-            log.warn("缓存定时清理时间获取失败，使用默认值", e);
-            return DEFAULT_CACHE_CLEAN_TICK_TIME;
+        protected static Profile.Section getSection(String sectionName) throws IOException {
+            ini.load();
+            Profile.Section section = ini.get(sectionName);
+            if (section == null) {
+                ini.add(sectionName);
+                ini.store();
+            }
+            return ini.get(sectionName);
         }
     }
 }

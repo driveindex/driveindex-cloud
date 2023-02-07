@@ -21,7 +21,7 @@ public class IAuthenticationProvider implements AuthenticationProvider {
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         assert authentication instanceof PasswordOnlyToken;
         PasswordOnlyToken token = (PasswordOnlyToken) authentication;
-        if (token.getCredentials().equals(ConfigManager.getAdminPassword())) {
+        if (token.getCredentials().equals(ConfigManager.Password.getValue())) {
             return PasswordOnlyToken.authenticated(token.getCredentials(), SecurityConfig.AUTH_ADMIN);
         }
         throw new WrongPasswordException();

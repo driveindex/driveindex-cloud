@@ -5,7 +5,8 @@
     <parent>
         <artifactId>driveindex</artifactId>
         <groupId>io.github.driveindex</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0-alpha04</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -21,22 +22,22 @@
         <dependency>
             <groupId>io.github.driveindex</groupId>
             <artifactId>commons</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0-alpha04</version>
         </dependency>
         <dependency>
             <groupId>io.github.driveindex</groupId>
             <artifactId>azure-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0-alpha04</version>
         </dependency>
         <dependency>
             <groupId>io.github.driveindex</groupId>
             <artifactId>admin-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0-alpha04</version>
         </dependency>
         <dependency>
             <groupId>io.github.driveindex</groupId>
             <artifactId>gateway-common</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0-alpha04</version>
         </dependency>
     </dependencies>
 </project>

@@ -12,7 +12,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.lang.Nullable;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
 import java.security.Key;
 import java.util.Date;
 
@@ -21,14 +20,11 @@ import java.util.Date;
  * @Date 2022/8/9 8:37
  */
 @Slf4j
-@Component
 public class JwtChecker {
     private static JwtParser parser;
 
-    @PostConstruct
-    protected void init() {
-        byte[] base = ConfigManager.getTokenSecurityKey();
-        Key secretKey = Keys.hmacShaKeyFor(base);
+    static {
+        Key secretKey = Keys.hmacShaKeyFor(ConfigManager.getTokenSecurityKey());
         parser = Jwts.parserBuilder().setSigningKey(secretKey).build();
     }
 
@@ -51,7 +47,9 @@ public class JwtChecker {
             }
             String tag = claims.get(DriveIndexCommon.JWT_TAG, String.class);
             return tag + "," + claims.getIssuedAt().getTime();
-        } catch (JwtException | IllegalArgumentException ignore) { }
+        } catch (JwtException | IllegalArgumentException | ClassCastException e) {
+            log.debug("未知错误", e);
+        }
         return null;
     }
 }

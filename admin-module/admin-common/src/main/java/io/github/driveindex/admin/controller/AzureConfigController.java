@@ -1,15 +1,15 @@
 package io.github.driveindex.admin.controller;
 
 import io.github.driveindex.admin.feign.AzureTokenClient;
-import io.github.driveindex.admin.h2.dao.AccountTokenDao;
+import io.github.driveindex.admin.h2.dao.AccountTokenDto;
 import io.github.driveindex.admin.h2.dao.AzureClientDao;
 import io.github.driveindex.admin.h2.dao.DriveConfigDao;
 import io.github.driveindex.admin.module.AzureAccountModule;
 import io.github.driveindex.admin.module.AzureClientModule;
 import io.github.driveindex.admin.module.DriveConfigModule;
+import io.github.driveindex.common.dto.admin.AzureAccountTokenDto;
 import io.github.driveindex.common.dto.azure.drive.AzureDriveDto;
-import io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto;
-import io.github.driveindex.common.dto.azure.microsoft.AzureTokenDto;
+import io.github.driveindex.common.dto.azure.drive.AzureDriveListDto;
 import io.github.driveindex.common.dto.result.FailedResult;
 import io.github.driveindex.common.dto.result.ResponseData;
 import io.github.driveindex.common.dto.result.SuccessResult;
@@ -33,11 +33,25 @@ public abstract class AzureConfigController {
     private final DriveConfigModule driveModule;
     private final AzureTokenClient tokenClient;
 
+    public ResponseData listConfig() {
+        AzureDriveListDto all = accountModule.getAll();
+        for (AzureAccountTokenDto dto : all) {
+            long expired = dto.getExpiresTime() - System.currentTimeMillis();
+            try {
+                if (expired < 10_000) refresh(dto);
+            } catch (AzureDecodeException e) {
+                log.warn("token 刷新失败！", e);
+                return new FailedResult(-4101, "token 刷新失败：" + e.getMessage());
+            }
+        }
+        return SuccessResult.of(all);
+    }
+
     public ResponseData getConfig(String aClient, String aAccount, String aDrive) {
         if (StringUtils.hasText(aClient)) {
             return FailedResult.NOT_FOUND;
         }
-        final AccountTokenDao accountDao;
+        final AccountTokenDto accountDao;
         synchronized (accountModule) {
             if (StringUtils.hasText(aAccount)) {
                 return FailedResult.NOT_FOUND;
@@ -46,7 +60,7 @@ public abstract class AzureConfigController {
             if (accountDao == null) {
                 return FailedResult.NOT_FOUND;
             }
-            long expired = accountDao.getExpiresIn() - System.currentTimeMillis();
+            long expired = accountDao.getExpiresTime() - System.currentTimeMillis();
             try {
                 if (expired < 10_000) refresh(accountDao);
             } catch (AzureDecodeException e) {
@@ -71,29 +85,30 @@ public abstract class AzureConfigController {
         return SuccessResult.of(result);
     }
 
-    private AzureTokenDto createTokenDto(AccountTokenDao dao) {
-        AzureTokenDto dto = new AzureTokenDto();
+    private AzureAccountTokenDto createTokenDto(AccountTokenDto dao) {
+        AzureAccountTokenDto dto = new AzureAccountTokenDto();
         dto.setAccessToken(dao.getAccessToken());
         dto.setTokenType(dao.getTokenType());
         return dto;
     }
 
-    private void refresh(AccountTokenDao dao) throws AzureDecodeException {
+    private void refresh(AzureAccountTokenDto dao) throws AzureDecodeException {
         AzureClientDao parentClient = clientModule.getById(dao.getParentClient());
         assert parentClient != null;
-        AccountTokenDto.Request request = new AccountTokenDto.Request();
+        io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto.Request request =
+                new io.github.driveindex.common.dto.azure.microsoft.AccountTokenDto.Request();
         request.setClientId(parentClient.getClientId());
 //        request.setClientSecret(parentClient.getClientSecret());
         request.setGrantType(AzureTokenClient.GRANT_TYPE_REFRESH);
         request.setRefreshToken(dao.getRefreshToken());
         Map<String, Object> map = tokenClient.refreshToken(request);
         String json = GsonUtil.fromMap(map);
-        AccountTokenDto.Response token = GsonUtil.fromJson(json, AccountTokenDto.Response.class);
+        AccountTokenDto token = GsonUtil.fromJson(json, AccountTokenDto.class);
         dao.setAccessToken(token.getAccessToken());
         dao.setRefreshToken(token.getRefreshToken());
         dao.setExpiresIn(token.getExpiresTime());
         dao.setScope(token.getScope());
         dao.setTokenType(token.getTokenType());
-        accountModule.save(dao);
+        accountModule.save(token);
     }
 }

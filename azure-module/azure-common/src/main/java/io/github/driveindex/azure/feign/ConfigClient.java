@@ -12,10 +12,13 @@ import java.util.Map;
  */
 @FeignClient("admin-service")
 public interface ConfigClient {
-    @GetMapping("/config")
+    @GetMapping("/private/admin/list_config")
+    Map<String, Object> listConfig();
+
+    @GetMapping("/private/admin/config")
     Map<String, Object> getConfig(
-            @RequestParam(required = false) String client,
-            @RequestParam(required = false) String account,
+            @RequestParam String client,
+            @RequestParam String account,
             @RequestParam(required = false) String drive
     );
 }

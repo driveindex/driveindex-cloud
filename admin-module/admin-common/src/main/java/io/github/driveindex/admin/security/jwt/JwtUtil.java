@@ -29,7 +29,7 @@ public class JwtUtil {
     protected void init() {
         byte[] base = ConfigManager.getTokenSecurityKey();
         secretKey = Keys.hmacShaKeyFor(base);
-        expired = ConfigManager.getTokenExpired();
+        expired = ConfigManager.TokenExpired.getValue();
     }
 
     public static String createToken(String password) throws NoSuchAlgorithmException {

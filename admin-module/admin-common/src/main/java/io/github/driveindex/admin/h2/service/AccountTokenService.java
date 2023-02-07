@@ -1,7 +1,7 @@
 package io.github.driveindex.admin.h2.service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import io.github.driveindex.admin.h2.dao.AccountTokenDao;
+import io.github.driveindex.admin.h2.dao.AccountTokenDto;
 import io.github.driveindex.admin.h2.mapper.AccountTokenMapper;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
@@ -15,14 +15,16 @@ import java.util.Optional;
  * @Date 2022/8/16 14:27
  */
 @Service
-public class AccountTokenService extends ServiceImpl<AccountTokenMapper, AccountTokenDao> {
-    public List<AccountTokenDao> getByClientId(@NonNull String aClient) {
-        return query().eq("parent_client", aClient)
-                .orderBy(true, false, "default_target_flag")
-                .list();
+public class AccountTokenService extends ServiceImpl<AccountTokenMapper, AccountTokenDto> {
+    public List<AccountTokenDto> getAll() {
+        return query().list();
     }
 
-    public Optional<AccountTokenDao> getByAccount(@NonNull String aClient, @NonNull String aAccount) {
+    public List<AccountTokenDto> getByClientId(@NonNull String aClient) {
+        return query().eq("parent_client", aClient).list();
+    }
+
+    public Optional<AccountTokenDto> getByAccount(@NonNull String aClient, @NonNull String aAccount) {
         return query()
                 .allEq(Map.of(
                         "parent_client", aClient,

@@ -15,6 +15,4 @@ public class DriveConfigDto implements Serializable {
     private String id;
     @Schema(description = "账号配置信息详情")
     private DriveConfigDetailDto detail;
-    @Schema(description = "是否默认")
-    private Boolean isDefault = false;
 }

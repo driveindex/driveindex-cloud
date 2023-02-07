@@ -5,7 +5,8 @@
     <parent>
         <artifactId>driveindex</artifactId>
         <groupId>io.github.driveindex</groupId>
-        <version>0.0.1-SNAPSHOT</version>
+        <version>1.0.0-alpha04</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <description>自制的轻量级日志服务，目前未启用</description>
@@ -36,7 +37,7 @@
         <dependency>
             <groupId>io.github.driveindex</groupId>
             <artifactId>commons</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>1.0.0-alpha04</version>
         </dependency>
     </dependencies>
 </project>

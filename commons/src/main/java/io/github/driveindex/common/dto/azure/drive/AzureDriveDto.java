@@ -1,6 +1,6 @@
 package io.github.driveindex.common.dto.azure.drive;
 
-import io.github.driveindex.common.dto.azure.microsoft.AzureTokenDto;
+import io.github.driveindex.common.dto.admin.AzureAccountTokenDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -13,7 +13,7 @@ import java.io.Serializable;
 @Data
 public class AzureDriveDto implements Serializable {
 
-    private AzureTokenDto token;
+    private AzureAccountTokenDto token;
     private String dirHome;
     private final CalledName calledName = new CalledName();
 

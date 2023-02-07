@@ -1,6 +1,8 @@
 package io.github.driveindex.common.util;
 
-import com.google.gson.*;
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +13,7 @@ import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,6 +46,10 @@ public class GsonUtil {
     }
 
     public static String fromMap(Map<?, ?> map) {
+        return GSON.toJson(map);
+    }
+
+    public static String fromList(List<?> map) {
         return GSON.toJson(map);
     }
 

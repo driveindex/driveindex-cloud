@@ -24,4 +24,10 @@ public class ConfigClientImpl implements ConfigClient {
         ResponseData config = controller.getConfig(client, account, drive);
         return GsonUtil.toMap(GsonUtil.toJson(config));
     }
+
+    @Override
+    public Map<String, Object> listConfig() {
+        ResponseData config = controller.listConfig();
+        return GsonUtil.toMap(GsonUtil.toJson(config));
+    }
 }

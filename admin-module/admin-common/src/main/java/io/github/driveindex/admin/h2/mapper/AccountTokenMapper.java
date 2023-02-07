@@ -1,7 +1,7 @@
 package io.github.driveindex.admin.h2.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import io.github.driveindex.admin.h2.dao.AccountTokenDao;
+import io.github.driveindex.admin.h2.dao.AccountTokenDto;
 import kotlin.Deprecated;
 import kotlin.ReplaceWith;
 import org.apache.ibatis.annotations.Mapper;
@@ -14,7 +14,7 @@ import java.util.LinkedList;
  * @Date 2022/8/7 17:07
  */
 @Mapper
-public interface AccountTokenMapper extends BaseMapper<AccountTokenDao> {
+public interface AccountTokenMapper extends BaseMapper<AccountTokenDto> {
     @java.lang.Deprecated
     @Deprecated(
             message = "Use Service instead.",
@@ -24,7 +24,7 @@ public interface AccountTokenMapper extends BaseMapper<AccountTokenDao> {
             )
     )
     @Select("select * from `account_token` where `parent_client`=#{clientId} order by `default_target_flag` desc")
-    LinkedList<AccountTokenDao> getByClientId(String aClient);
+    LinkedList<AccountTokenDto> getByClientId(String aClient);
 
     @java.lang.Deprecated
     @Deprecated(
@@ -35,7 +35,7 @@ public interface AccountTokenMapper extends BaseMapper<AccountTokenDao> {
             )
     )
     @Select("select * from `account_token` where `parent_client`=#{clientId} order by `default_target_flag` desc limit 1")
-    AccountTokenDao getDefaultByClientId(String aClient);
+    AccountTokenDto getDefaultByClientId(String aClient);
 
     @java.lang.Deprecated
     @Deprecated(
@@ -46,5 +46,5 @@ public interface AccountTokenMapper extends BaseMapper<AccountTokenDao> {
             )
     )
     @Select("select * from `account_token` where `parent_client`=#{clientId} and `id`=#{accountId}")
-    AccountTokenDao getByAccount(String aClient, String aAccount);
+    AccountTokenDto getByAccount(String aClient, String aAccount);
 }

@@ -16,8 +16,6 @@ public class AzureClientDto implements Serializable {
     private String id;
     @Schema(description = "Client 配置信息详情")
     private AzureClientDetailDto detail;
-    @Schema(description = "是否默认")
-    private Boolean isDefault = false;
 
     @Schema(description = "当前 Client 下属账号配置")
     private List<AccountDto> child;

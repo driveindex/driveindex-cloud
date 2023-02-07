@@ -29,7 +29,7 @@ public class AzureClientModule {
             AzureClientDto tmp = new AzureClientDto();
             tmp.setId(dao.getId());
             tmp.setDetail(dao.clone());
-            tmp.setChild(accountModule.getAll(dao.getId()));
+            tmp.setChild(accountModule.getAllByClient(dao.getId()));
             result.add(tmp);
         }
         if (!result.isEmpty()) result.getFirst().setIsDefault(true);
